@@ -7,6 +7,7 @@
 #include "Characters/Interactor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Particles/ParticleSystemComponent.h"
 
@@ -144,4 +145,6 @@ void AWeapon::attach(UMeshComponent* toTarget, FName socket) {
 	
 	const FAttachmentTransformRules attachRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true);
 	mesh->AttachToComponent(toTarget, attachRules, socket);
+
+	sphere->DetachFromParent();
 }

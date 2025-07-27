@@ -2,6 +2,8 @@
 
 
 #include "Enemy/Enemy.h"
+
+#include "DebugUtilities.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -49,7 +51,8 @@ void AEnemy::hit(const FVector& p) {
 	if (hitParticle) {
 		UGameplayStatics::SpawnEmitterAtLocation(this, hitParticle, p);
 	}
-	
+
+	UDebugUtilities::drawSphere(GetWorld(), p, 16.f);
 	playStruckMontage(computeDirectionalStruckSection(p));
 }
 
