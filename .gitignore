@@ -1,0 +1,17 @@
+# Unreal Engine specific files
+*.log
+*.tmp
+*.pdb
+*.suo
+*.user
+*.sdf
+*.ipch
+*.opensdf
+
+# Binaries and Intermediate folders
+Binaries/
+Intermediate/
+Saved/
+
+# Build artifacts
+DerivedDataCache/
