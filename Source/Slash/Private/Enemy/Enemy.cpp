@@ -43,7 +43,7 @@ FName AEnemy::computeDirectionalStruckSection(const FVector& p) {
 	return section;
 }
 
-void AEnemy::hit(const FVector& p) {
+void AEnemy::hit_Implementation(const FVector& p) {
 	if (hitSound) {
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), hitSound, p);
 	}

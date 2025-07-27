@@ -65,9 +65,11 @@ void AWeapon::boxOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* 
 	if (actor != nullptr) {
 		IHittable* hittable = Cast<IHittable>(actor);
 		if (hittable != nullptr) {
-			hittable->hit(result.ImpactPoint);
+			IHittable::Execute_hit(actor, result.ImpactPoint);
 			ignoredActors.AddUnique(actor);
 		}
+		
+		createFields(result.ImpactPoint);
 	}
 }
 
@@ -146,5 +148,5 @@ void AWeapon::attach(UMeshComponent* toTarget, FName socket) {
 	const FAttachmentTransformRules attachRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true);
 	mesh->AttachToComponent(toTarget, attachRules, socket);
 
-	sphere->DetachFromParent();
+	sphere->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
 }

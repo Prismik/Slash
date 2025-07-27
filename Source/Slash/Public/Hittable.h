@@ -19,5 +19,6 @@ class SLASH_API IHittable {
 	GENERATED_BODY()
 
 public:
-	virtual  void hit(const FVector& p) = 0;
+	UFUNCTION(BlueprintNativeEvent)
+	void hit(const FVector& p);
 };
