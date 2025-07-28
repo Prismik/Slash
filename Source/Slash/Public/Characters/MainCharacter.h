@@ -16,6 +16,8 @@ class UInteractor;
 class UAnimMontage;
 class AWeapon;
 class UComboTracker;
+class UInventory;
+class ATreasure;
 
 UCLASS()
 class SLASH_API AMainCharacter : public ACharacter
@@ -29,7 +31,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void addOverlap(AInteractable* interactable);
 	void removeOverlap(AInteractable* interactable);
-
+	void collect(ATreasure* treasure);
 	void setWeapon(AWeapon* weapon);
 
 	UFUNCTION(BlueprintCallable)
@@ -40,16 +42,10 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, Category="MainCharacter|Movement")
 	bool sprintToggled = false;
-	
-	UPROPERTY(VisibleAnywhere, Category="MainCharacter|Interactor")
-	UInteractor* interactor;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="MainCharacter|Anim")
 	ECharacterState state = ECharacterState::ECS_unequipped;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="MainCharacter|Combo")
-	uint8 combo = 0;
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="MainCharacter|Weapon")
 	AWeapon* equippedWeapon;
 
@@ -59,6 +55,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="MainCharacter|Anim")
 	UAnimMontage* armingMontage;
 
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="MainCharacter|Inventory")
+	UInventory* inventory;
+	
 	static const FName HAND_SOCKET;
 	static const FName SPINE_SOCKET;
 	
@@ -94,6 +93,9 @@ private:
 	const float maxArmLength = 750.f;
 	
 	float targetArmLength;
+
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"), Category="MainCharacter|Interactor")
+	UInteractor* interactor;
 	
 	UFUNCTION()
 	void move(const FInputActionValue& Value);

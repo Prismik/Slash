@@ -28,12 +28,12 @@ public:
 	USoundBase* equipSound;
 	
 	virtual void Tick(float DeltaTime) override;
-
+	virtual void interact_Implementation(AMainCharacter* character) override;
+	
 	void equip(AMainCharacter* character);
 	void unequip(AMainCharacter* character);
 
 	void attach(UMeshComponent* toTarget, FName socket);
-	virtual void interact(AMainCharacter* character) override;
 
 	UFUNCTION(BlueprintCallable)
 	void setBoxCollision(bool enabled);

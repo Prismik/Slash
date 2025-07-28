@@ -29,8 +29,10 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-private:	
+private:
+	UPROPERTY(VisibleInstanceOnly, meta = (AllowPrivateAccess = true))
 	TArray<AInteractable*> interactables;
 
+	UPROPERTY(VisibleInstanceOnly, meta = (AllowPrivateAccess = true))
 	int32 index = 0;
 };

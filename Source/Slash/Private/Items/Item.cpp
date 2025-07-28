@@ -3,7 +3,6 @@
 
 #include "Items/Item.h"
 #include "DrawDebugHelpers.h"
-#include "Components/SphereComponent.h"
 
 AItem::AItem() {
  	PrimaryActorTick.bCanEverTick = true; // Set this actor to call Tick() every frame.
@@ -12,8 +11,6 @@ AItem::AItem() {
 void AItem::BeginPlay() {
 	Super::BeginPlay();
 
-	sphere->OnComponentBeginOverlap.AddDynamic(this, &AItem::sphereOverlapBegin);
-	sphere->OnComponentEndOverlap.AddDynamic(this, &AItem::sphereOverlapEnd);
 }
 
 float AItem::computeSinTransformation() {

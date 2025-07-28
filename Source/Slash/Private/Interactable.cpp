@@ -15,10 +15,6 @@ AInteractable::AInteractable() {
 	sphere->SetupAttachment(GetRootComponent());
 }
 
-void AInteractable::interact(AMainCharacter* character) {
-	
-}
-
 void AInteractable::focus() {
 	mesh->SetOverlayMaterial(overlay);
 }
@@ -44,7 +40,10 @@ void AInteractable::sphereOverlapEnd(UPrimitiveComponent* OverlappedComponent, A
 // Called when the game starts or when spawned
 void AInteractable::BeginPlay() {
 	Super::BeginPlay();
-
+	
+	sphere->OnComponentBeginOverlap.AddDynamic(this, &AInteractable::sphereOverlapBegin);
+	sphere->OnComponentEndOverlap.AddDynamic(this, &AInteractable::sphereOverlapEnd);
+	
 	// cache the overlay for later use with interact range
 	overlay = mesh->GetOverlayMaterial();
 	mesh->SetOverlayMaterial(nullptr);
@@ -56,3 +55,6 @@ void AInteractable::Tick(float DeltaTime) {
 
 }
 
+void AInteractable::interact_Implementation(AMainCharacter* character) {
+	
+}

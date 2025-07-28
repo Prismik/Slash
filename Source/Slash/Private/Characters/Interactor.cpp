@@ -3,6 +3,7 @@
 
 #include "Characters/Interactor.h"
 
+#include "DebugUtilities.h"
 #include "Interactable.h"
 
 UInteractor::UInteractor() {
@@ -15,7 +16,6 @@ void UInteractor::BeginPlay() {
 	Super::BeginPlay();
 
 }
-
 
 // Called every frame
 void UInteractor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
@@ -33,9 +33,11 @@ void UInteractor::add(AInteractable* interactable) {
 
 void UInteractor::remove(AInteractable* interactable) {
 	int32 elementIndex = interactables.Find(interactable);
+	if (elementIndex == INDEX_NONE) return;
+	
 	interactable->unfocus();
 	interactables.Remove(interactable);
-	
+
 	if (elementIndex == index) {
 		index = FMath::Max(0, index - 1);
 	} else if (elementIndex < index) {

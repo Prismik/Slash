@@ -18,7 +18,10 @@ class SLASH_API AInteractable : public AActor
 public:	
 	AInteractable();
 	virtual void Tick(float DeltaTime) override;
-	virtual void interact(AMainCharacter* character);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void interact(AMainCharacter* character);
+	
 	virtual void focus();
 	virtual void unfocus();
 	

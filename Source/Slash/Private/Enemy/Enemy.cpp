@@ -52,7 +52,6 @@ void AEnemy::hit_Implementation(const FVector& p) {
 		UGameplayStatics::SpawnEmitterAtLocation(this, hitParticle, p);
 	}
 
-	UDebugUtilities::drawSphere(GetWorld(), p, 16.f);
 	playStruckMontage(computeDirectionalStruckSection(p));
 }
 

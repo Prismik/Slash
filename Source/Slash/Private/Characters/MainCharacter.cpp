@@ -2,10 +2,8 @@
 
 
 #include "Characters/MainCharacter.h"
-
-#include <rapidjson/document.h>
-
-#include "DebugUtilities.h"
+#include "Characters/Inventory.h"
+#include "Items/Treasure.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Input/InputDataConfig.h"
@@ -47,6 +45,9 @@ AMainCharacter::AMainCharacter() {
 	interactor->character = this;
 
 	tracker = CreateDefaultSubobject<UComboTracker>(TEXT("ComboTracker"));
+	
+	inventory = CreateDefaultSubobject<UInventory>(TEXT("Inventory"));
+	
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
 
@@ -62,6 +63,11 @@ void AMainCharacter::removeOverlap(AInteractable* interactable) {
 	interactor->remove(interactable);
 }
 
+void AMainCharacter::collect(ATreasure* treasure) {
+	interactor->remove(treasure);
+	inventory->currency += treasure->value;
+}
+
 void AMainCharacter::setWeapon(AWeapon* weapon) {
 	equippedWeapon = weapon;
 	tracker->assign(weapon);
@@ -69,6 +75,8 @@ void AMainCharacter::setWeapon(AWeapon* weapon) {
 		state = ECharacterState::ECS_unequipped;
 		return;
 	}
+
+	interactor->remove(weapon);
 	
 	if (weapon->twoHanded) {
 		state = ECharacterState::ECS_equippedTwoHanded;
@@ -165,10 +173,6 @@ void AMainCharacter::sprint(const FInputActionValue& Value) {
 
 void AMainCharacter::interact(const FInputActionValue& Value) {
 	bool val = Value.Get<bool>();
-	
-	if (GEngine) {
-		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, TEXT("interact called"));
-	}
 	if (!val) { return; }
 
 	interactor->interact();

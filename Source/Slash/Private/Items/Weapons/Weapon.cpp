@@ -82,9 +82,9 @@ void AWeapon::Tick(float DeltaTime) {
 	}
 }
 
-void AWeapon::interact(AMainCharacter* character) {
-	Super::interact(character);
-	
+void AWeapon::interact_Implementation(AMainCharacter* character) {
+	Super::interact_Implementation(character);
+
 	equip(character);
 }
 
@@ -123,7 +123,6 @@ void AWeapon::equip(AMainCharacter* character) {
 		
 	UMeshComponent* characterMesh = character->GetMesh();
 	attach(characterMesh, AMainCharacter::HAND_SOCKET);
-	character->interactor->remove(this);
 	
 	// Clear interactable highlight
 	mesh->SetOverlayMaterial(nullptr);
