@@ -2,7 +2,11 @@
 
 
 #include "Breakable.h"
+#include "Components/CapsuleComponent.h"
 #include "GeometryCollection/GeometryCollectionComponent.h"
+#include "Items/Treasure.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ABreakable::ABreakable()
 {
@@ -13,12 +17,28 @@ ABreakable::ABreakable()
 	geometryCollection->SetGenerateOverlapEvents(true);
 	geometryCollection->SetDamagePropagationData(FGeometryCollectionDamagePropagationData(true, 2.f, 0.f));
 	geometryCollection->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	geometryCollection->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+
+	capsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
+	capsule->SetupAttachment(GetRootComponent());
+	capsule->SetCollisionResponseToAllChannels(ECR_Ignore);
+	capsule->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 }
 
 void ABreakable::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void ABreakable::spawnTreasure() {
+	UWorld* world = GetWorld();
+	if (world && !treasureBlueprintClasses.IsEmpty()) {
+		int32 index = UKismetMathLibrary::RandomInteger(treasureBlueprintClasses.Num() * 2);
+		if (treasureBlueprintClasses.IsValidIndex(index)) {
+			world->SpawnActor<ATreasure>(treasureBlueprintClasses[index], GetActorLocation(), GetActorRotation());
+		}
+	}
 }
 
 void ABreakable::Tick(float DeltaTime)
@@ -28,6 +48,9 @@ void ABreakable::Tick(float DeltaTime)
 }
 
 void ABreakable::hit_Implementation(const FVector& p) {
+	if (broken) return;
+	broken = true;
 	
+	spawnTreasure();
 }
 

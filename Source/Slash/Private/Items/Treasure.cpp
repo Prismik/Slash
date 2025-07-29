@@ -2,16 +2,25 @@
 
 
 #include "Items/Treasure.h"
-
-#include "DebugUtilities.h"
-#include "Characters/Interactor.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Characters/MainCharacter.h"
 
+
+int32 ATreasure::getValue() {
+	return currency;
+}
 
 void ATreasure::interact_Implementation(AMainCharacter* character) {
 	Super::interact_Implementation(character);
 
-	UDebugUtilities::print(FString("Called interact on coin"));
 	character->collect(this);
 	this->Destroy();
+}
+
+void ATreasure::BeginPlay() {
+	Super::BeginPlay();
+	
+	// Currently uniform distribution. Would be nice to have a gaussian instead.
+	double multiplier = UKismetMathLibrary::RandomFloatInRange(0.75, 1.5);
+	currency = static_cast<int32>(multiplier * baseValue);
 }

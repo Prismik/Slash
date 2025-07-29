@@ -36,9 +36,4 @@ void AItem::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	runTime += DeltaTime;
-
-	// Roll: X, Pitch: y, Yaw: Z
-	if (rotationSpeed != 0.f) {
-		AddActorLocalRotation(FRotator(0.f, rotationSpeed * DeltaTime, 0.f));
-	}
 }

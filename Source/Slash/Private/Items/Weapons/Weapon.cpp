@@ -77,8 +77,14 @@ void AWeapon::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	rotationSpeed = state == EItemState::EIS_equipped ? 0 : 20.f;
+	
 	if (state == EItemState::EIS_hovering) {
 		AddActorWorldOffset(FVector(0.f,0.f, computeSinTransformation()));
+	}
+	
+	// Roll: X, Pitch: y, Yaw: Z
+	if (rotationSpeed != 0.f) {
+		AddActorLocalRotation(FRotator(0.f, rotationSpeed * DeltaTime, 0.f));
 	}
 }
 

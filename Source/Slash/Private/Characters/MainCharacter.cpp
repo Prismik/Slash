@@ -65,13 +65,13 @@ void AMainCharacter::removeOverlap(AInteractable* interactable) {
 
 void AMainCharacter::collect(ATreasure* treasure) {
 	interactor->remove(treasure);
-	inventory->currency += treasure->value;
+	inventory->currency += treasure->getValue();
 }
 
 void AMainCharacter::setWeapon(AWeapon* weapon) {
 	equippedWeapon = weapon;
 	tracker->assign(weapon);
-	if (weapon == nullptr) {
+	if (!weapon) {
 		state = ECharacterState::ECS_unequipped;
 		return;
 	}
@@ -86,13 +86,13 @@ void AMainCharacter::setWeapon(AWeapon* weapon) {
 }
 
 void AMainCharacter::arm() {
-	if (equippedWeapon == nullptr) return;
+	if (!equippedWeapon) return;
 	
 	equippedWeapon->attach(this->GetMesh(), HAND_SOCKET);
 }
 
 void AMainCharacter::disarm() {
-	if (equippedWeapon == nullptr) return;
+	if (!equippedWeapon) return;
 	
 	equippedWeapon->attach(this->GetMesh(), SPINE_SOCKET);
 }
@@ -211,6 +211,7 @@ void AMainCharacter::attack(const FInputActionValue& Value) {
 }
 
 void AMainCharacter::equip(const FInputActionValue& Value) {
+	if (!equippedWeapon) return;
 	if (actionState != EActionState::EAS_unoccupied) return;
 	
 	actionState = EActionState::EAS_equipping;

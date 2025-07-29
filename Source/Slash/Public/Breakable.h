@@ -8,6 +8,8 @@
 #include "Breakable.generated.h"
 
 class UGeometryCollectionComponent;
+class ATreasure;
+class UCapsuleComponent;
 
 UCLASS()
 class SLASH_API ABreakable : public AActor, public IHittable
@@ -22,7 +24,21 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+	UCapsuleComponent* capsule;
+	
 private:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Breakable|Audio")
+	USoundBase* breakSound;
+	
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category="Breakable|Properties")
+	bool broken = false;
+	
 	UPROPERTY(VisibleAnywhere)
 	UGeometryCollectionComponent* geometryCollection;
+
+	UPROPERTY(EditDefaultsOnly, Category="Breakable|treasure")
+	TArray<TSubclassOf<ATreasure>> treasureBlueprintClasses;
+
+	void spawnTreasure();
 };
