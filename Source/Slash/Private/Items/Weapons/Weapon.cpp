@@ -64,6 +64,7 @@ void AWeapon::boxOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* 
 	if (actor != nullptr) {
 		IHittable* hittable = Cast<IHittable>(actor);
 		if (hittable != nullptr) {
+			UGameplayStatics::ApplyDamage(actor, baseDamage, GetInstigator()->GetController(), this, UDamageType::StaticClass());
 			IHittable::Execute_hit(actor, result.ImpactPoint);
 			ignoredActors.AddUnique(actor);
 		}
@@ -129,6 +130,9 @@ void AWeapon::equip(AMainCharacter* character) {
 	UMeshComponent* characterMesh = character->GetMesh();
 	attach(characterMesh, AMainCharacter::HAND_SOCKET);
 	
+	SetOwner(character);
+	SetInstigator(character);
+	
 	// Clear interactable highlight
 	mesh->SetOverlayMaterial(nullptr);
 	state = EItemState::EIS_equipped;
@@ -137,9 +141,11 @@ void AWeapon::equip(AMainCharacter* character) {
 }
 
 void AWeapon::unequip(AMainCharacter* character) {
-	// TODO Put back in the world?
+	// TODO Put back in the world? + detach from socket
 	state = EItemState::EIS_hovering;
 	canInteract = true; // ??
+	SetOwner(nullptr);
+	SetInstigator(nullptr);
 	character->setWeapon(nullptr);
 	
 }

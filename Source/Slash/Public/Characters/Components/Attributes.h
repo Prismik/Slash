@@ -15,8 +15,15 @@ public:
 	UAttributes();
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
+	void addHealth(float value);
+	void addEnergy(float value);
+	float healthRaw() { return health; }
+	float energyRaw() { return energy; }
 	float healthPercent();
 	float energyPercent();
+
+	bool alive();
 	
 protected:
 	virtual void BeginPlay() override;

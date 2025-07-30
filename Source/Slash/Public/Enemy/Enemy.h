@@ -5,12 +5,15 @@
 #include "CoreMinimal.h"
 #include "Hittable.h"
 #include "GameFramework/Character.h"
+#include "Characters/CharacterTypes.h"
 #include "Enemy.generated.h"
 
 class UAnimMontage;
 class USoundBase;
 class UAttributes;
 class UHealthBarComponent;
+class AController;
+struct FDamageEvent;
 
 UCLASS()
 class SLASH_API AEnemy : public ACharacter, public IHittable {
@@ -22,7 +25,9 @@ public:
 	virtual void hit_Implementation(const FVector& p) override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	// Consts
 	static const FName STRUCT_FRONT_SECTION;
 	static const FName STRUCK_LEFT_SECTION;
 	static const FName STRUCK_RIGHT_SECTION;
@@ -32,9 +37,15 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "Enemy")
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Enemy")
+	EDeathPose deathPose = EDeathPose::EDP_alive;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Anim")
 	UAnimMontage* struckMontage;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Anim")
+	UAnimMontage* deathMontage;
+	
 	UPROPERTY(EditAnywhere, Category = "Enemy")
 	USoundBase* hitSound;
 
@@ -46,7 +57,15 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Enemy")
 	UHealthBarComponent* healthBar;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Enemy|Combat")
+	AActor* target;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess=true), Category = "Enemy|Combat")
+	double combatRadius = 350;
 	
+	void handleDeath();
 	FName computeDirectionalStruckSection(const FVector& p);
 	void playStruckMontage(const FName& section);
+	void playDeathMontage(const FName& section);
 };

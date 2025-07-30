@@ -42,6 +42,7 @@ protected:
 	float computeCosTransformation();
 
 	UPROPERTY(EditAnywhere, Category = "Item|FX")
+	
 	UNiagaraComponent* emberEffect;
 	
 	template<typename T>

@@ -29,6 +29,33 @@ AEnemy::AEnemy() {
 	healthBar->SetupAttachment(GetRootComponent());
 }
 
+void AEnemy::handleDeath() {
+	const uint32 rng = FMath::RandRange(0, 2);
+	switch (rng) {
+	case 0:
+		deathPose = EDeathPose::EDP_death1;
+		playDeathMontage(FName("death1"));
+		break;
+	case 1:
+		deathPose = EDeathPose::EDP_death2;
+		playDeathMontage(FName("death2"));
+		break;
+	case 2:
+		deathPose = EDeathPose::EDP_death3;
+		playDeathMontage(FName("death2"));
+		break;
+	default:
+		deathPose = EDeathPose::EDP_alive;
+		break;
+	}
+		
+	SetLifeSpan(15.0);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	healthBar->SetVisibility(false);
+}
+
 FName AEnemy::computeDirectionalStruckSection(const FVector& p) {
 	const FVector forward = GetActorForwardVector();
 	const FVector d = ((p - GetActorLocation()) * FVector(1.f, 1.f, 0.f)).GetSafeNormal();
@@ -57,7 +84,11 @@ void AEnemy::hit_Implementation(const FVector& p) {
 		UGameplayStatics::SpawnEmitterAtLocation(this, hitParticle, p);
 	}
 
-	playStruckMontage(computeDirectionalStruckSection(p));
+	if (attributes && attributes->alive()) {
+		playStruckMontage(computeDirectionalStruckSection(p));
+	} else {
+		handleDeath();
+	}
 }
 
 void AEnemy::BeginPlay() {
@@ -76,13 +107,46 @@ void AEnemy::playStruckMontage(const FName& section) {
 	animInst->Montage_JumpToSection(section, struckMontage);
 }
 
+void AEnemy::playDeathMontage(const FName& section) {
+	UAnimInstance* animInst = GetMesh()->GetAnimInstance();
+	if (animInst == nullptr || deathMontage == nullptr) return;
+
+	animInst->Montage_Play(deathMontage);
+	animInst->Montage_JumpToSection(section, deathMontage);
+}
+
 void AEnemy::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
+	if (target) {
+		const double distanceFromTarget = (target->GetActorLocation() - GetActorLocation()).Length();
+		if (distanceFromTarget > combatRadius) {
+			target = nullptr;
+			if (healthBar) {
+				healthBar->SetVisibility(false);
+			}
+		}
+	}
 }
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
+	if (!attributes) return 0.f;
+	float current = attributes->healthRaw();
+	attributes->addHealth(-DamageAmount);
+	float postDamage = attributes->healthRaw();
+
+	if (healthBar) {
+		healthBar->SetVisibility(true);
+		healthBar->setHealthPercent(attributes->healthPercent());
+	}
+
+	target = EventInstigator->GetPawn();
+	
+	return current - postDamage;
 }
 

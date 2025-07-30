@@ -69,4 +69,7 @@ private:
 	
 	UPROPERTY(VisibleAnywhere)
 	UParticleSystemComponent* trailParticleEmitter;
+
+	UPROPERTY(EditAnywhere)
+	float baseDamage = 20;
 };

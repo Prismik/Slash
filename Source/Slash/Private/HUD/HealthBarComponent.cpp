@@ -20,12 +20,13 @@ void UHealthBarComponent::setHealthPercent(float percent) {
 	if (healthBar) {
 		healthBar->progress->SetPercent(percent);
 	}
+	
+	healthBar->SetVisibility(percent == 1.f ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
 }
 
 void UHealthBarComponent::BeginPlay() {
 	Super::BeginPlay();
 
-	
 }
 
 void UHealthBarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
