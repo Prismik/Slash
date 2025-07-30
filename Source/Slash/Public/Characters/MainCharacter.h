@@ -18,6 +18,7 @@ class AWeapon;
 class UComboTracker;
 class UInventory;
 class ATreasure;
+class UAttributes;
 
 UCLASS()
 class SLASH_API AMainCharacter : public ACharacter
@@ -57,6 +58,9 @@ public:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="MainCharacter|Inventory")
 	UInventory* inventory;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category="MainCharacter|Inventory")
+	UAttributes* attributes;
 	
 	static const FName HAND_SOCKET;
 	static const FName SPINE_SOCKET;

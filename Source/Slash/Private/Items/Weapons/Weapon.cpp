@@ -4,7 +4,6 @@
 #include "Items/Weapons/Weapon.h"
 #include "Hittable.h"
 #include "Characters/MainCharacter.h"
-#include "Characters/Interactor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"

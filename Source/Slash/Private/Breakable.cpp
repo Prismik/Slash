@@ -28,7 +28,19 @@ ABreakable::ABreakable()
 void ABreakable::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	geometryCollection->OnChaosBreakEvent.AddDynamic(this, &ABreakable::handleBreakEvent);
+}
+
+void ABreakable::handleBreakEvent(const FChaosBreakEvent& BreakEvent) {
+	if (broken) return;
+	broken = true;
+
+	SetLifeSpan(5.0);
+	capsule->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	if (breakSound) {
+		UGameplayStatics::PlaySoundAtLocation(this, breakSound, GetActorLocation());
+	}
+	spawnTreasure();
 }
 
 void ABreakable::spawnTreasure() {
@@ -48,9 +60,6 @@ void ABreakable::Tick(float DeltaTime)
 }
 
 void ABreakable::hit_Implementation(const FVector& p) {
-	if (broken) return;
-	broken = true;
-	
-	spawnTreasure();
+	// Handled in handleBreakEvent now
 }
 

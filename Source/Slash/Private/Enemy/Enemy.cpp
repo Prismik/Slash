@@ -2,11 +2,11 @@
 
 
 #include "Enemy/Enemy.h"
-
-#include "DebugUtilities.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Characters/Components/Attributes.h"
+#include "HUD/HealthBarComponent.h"
 
 const FName AEnemy::STRUCT_FRONT_SECTION(FName("hitReact_front"));
 const FName AEnemy::STRUCK_LEFT_SECTION(FName("hitReact_left"));
@@ -22,6 +22,11 @@ AEnemy::AEnemy() {
 	GetMesh()->SetGenerateOverlapEvents(true);
 	
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+
+	attributes = CreateDefaultSubobject<UAttributes>(FName("Attributes"));
+
+	healthBar = CreateDefaultSubobject<UHealthBarComponent>(FName("HealthBar"));
+	healthBar->SetupAttachment(GetRootComponent());
 }
 
 FName AEnemy::computeDirectionalStruckSection(const FVector& p) {

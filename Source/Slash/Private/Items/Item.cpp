@@ -2,10 +2,14 @@
 
 
 #include "Items/Item.h"
+#include "NiagaraComponent.h"
 #include "DrawDebugHelpers.h"
 
 AItem::AItem() {
- 	PrimaryActorTick.bCanEverTick = true; // Set this actor to call Tick() every frame.
+ 	PrimaryActorTick.bCanEverTick = true;
+
+	emberEffect = CreateDefaultSubobject<UNiagaraComponent>(FName("embers"));
+	emberEffect->SetupAttachment(GetRootComponent());
 }
 
 void AItem::BeginPlay() {

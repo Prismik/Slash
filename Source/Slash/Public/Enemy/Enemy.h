@@ -9,6 +9,8 @@
 
 class UAnimMontage;
 class USoundBase;
+class UAttributes;
+class UWidgetComponent;
 
 UCLASS()
 class SLASH_API AEnemy : public ACharacter, public IHittable {
@@ -30,14 +32,20 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Anim")
+	UPROPERTY(EditDefaultsOnly, Category = "Enemy")
 	UAnimMontage* struckMontage;
 
-	UPROPERTY(EditAnywhere, Category = "Enemy|Audio")
+	UPROPERTY(EditAnywhere, Category = "Enemy")
 	USoundBase* hitSound;
 
-	UPROPERTY(EditAnywhere, Category = "Enemy|VFX")
+	UPROPERTY(EditAnywhere, Category = "Enemy")
 	UParticleSystem* hitParticle;
+
+	UPROPERTY(VisibleAnywhere, meta=(AllowPrivateAccess=true), Category = "Enemy")
+	UAttributes* attributes;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Enemy")
+	UWidgetComponent* healthBar;
 	
 	FName computeDirectionalStruckSection(const FVector& p);
 	void playStruckMontage(const FName& section);

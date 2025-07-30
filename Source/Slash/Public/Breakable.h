@@ -10,6 +10,7 @@
 class UGeometryCollectionComponent;
 class ATreasure;
 class UCapsuleComponent;
+struct FChaosBreakEvent;
 
 UCLASS()
 class SLASH_API ABreakable : public AActor, public IHittable
@@ -22,10 +23,13 @@ public:
 	virtual void hit_Implementation(const FVector& p) override;
 	
 protected:
-	virtual void BeginPlay() override;
-
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	UCapsuleComponent* capsule;
+	
+	virtual void BeginPlay() override;
+	
+	UFUNCTION()
+	void handleBreakEvent(const FChaosBreakEvent& BreakEvent);
 	
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category="Breakable|Audio")

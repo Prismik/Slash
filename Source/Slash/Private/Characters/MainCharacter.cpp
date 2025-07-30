@@ -2,18 +2,18 @@
 
 
 #include "Characters/MainCharacter.h"
-#include "Characters/Inventory.h"
-#include "Items/Treasure.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "Input/InputDataConfig.h"
-#include "GameFramework/SpringArmComponent.h"
-#include "Camera/CameraComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Interactable.h"
-#include "Characters/Interactor.h"
 #include "Animation/AnimMontage.h"
-#include "Characters/ComboTracker.h"
+#include "Camera/CameraComponent.h"
+#include "Characters/Components/ComboTracker.h"
+#include "Characters/Components/Interactor.h"
+#include "Characters/Components/Inventory.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Input/InputDataConfig.h"
+#include "Items/Treasure.h"
 #include "Items/Weapons/Weapon.h"
 
 const FName AMainCharacter::HAND_SOCKET(FName("hand_r_socket"));

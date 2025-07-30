@@ -7,6 +7,8 @@
 #include "GameFramework/Actor.h"
 #include "Item.generated.h"
 
+class UNiagaraComponent;
+
 enum class EItemState : uint8 {
 	EIS_hovering,
 	EIS_equipped
@@ -28,7 +30,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Item|Sin parameters")
 	float timeConstant = 5.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Item|Rotation parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Item|Sin parameters")
 	float rotationSpeed = 20.f;
 	
 	virtual void BeginPlay() override;
@@ -39,6 +41,9 @@ protected:
 	UFUNCTION(BlueprintPure, Category="Item|Sin parameters")
 	float computeCosTransformation();
 
+	UPROPERTY(EditAnywhere, Category = "Item|FX")
+	UNiagaraComponent* emberEffect;
+	
 	template<typename T>
 	T avg(T lhs, T rhs);
 

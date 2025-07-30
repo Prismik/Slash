@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Characters/Interactor.h"
+#include "Characters/Components/Interactor.h"
 
 #include "DebugUtilities.h"
 #include "Interactable.h"
