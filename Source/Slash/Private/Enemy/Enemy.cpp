@@ -62,7 +62,10 @@ void AEnemy::hit_Implementation(const FVector& p) {
 
 void AEnemy::BeginPlay() {
 	Super::BeginPlay();
-	
+
+	if (healthBar) {
+		healthBar->setHealthPercent(1.f);
+	}
 }
 
 void AEnemy::playStruckMontage(const FName& section) {

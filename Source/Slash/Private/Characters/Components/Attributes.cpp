@@ -22,3 +22,11 @@ void UAttributes::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 
 }
 
+float UAttributes::healthPercent() {
+	return FMath::Clamp(health / maxHealth, 0.f, 1.f);
+}
+
+float UAttributes::energyPercent() {
+	return FMath::Clamp(energy / maxEnergy, 0.f, 1.f);
+}
+

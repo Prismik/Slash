@@ -10,7 +10,7 @@
 class UAnimMontage;
 class USoundBase;
 class UAttributes;
-class UWidgetComponent;
+class UHealthBarComponent;
 
 UCLASS()
 class SLASH_API AEnemy : public ACharacter, public IHittable {
@@ -45,7 +45,7 @@ private:
 	UAttributes* attributes;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Enemy")
-	UWidgetComponent* healthBar;
+	UHealthBarComponent* healthBar;
 	
 	FName computeDirectionalStruckSection(const FVector& p);
 	void playStruckMontage(const FName& section);

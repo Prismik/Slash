@@ -15,7 +15,9 @@ public:
 	UAttributes();
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	float healthPercent();
+	float energyPercent();
+	
 protected:
 	virtual void BeginPlay() override;
 

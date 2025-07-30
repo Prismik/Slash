@@ -3,24 +3,33 @@
 
 #include "HUD/HealthBarComponent.h"
 
+#include "Components/ProgressBar.h"
+#include "HUD/HealthBar.h"
+
 
 UHealthBarComponent::UHealthBarComponent() {
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
+}
+
+void UHealthBarComponent::setHealthPercent(float percent) {
+	if (healthBar == nullptr) {
+		healthBar = Cast<UHealthBar>(GetUserWidgetObject());
+	}
+	
+	if (healthBar) {
+		healthBar->progress->SetPercent(percent);
+	}
 }
 
 void UHealthBarComponent::BeginPlay() {
 	Super::BeginPlay();
 
-	// ...
 	
 }
 
-void UHealthBarComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-                                        FActorComponentTickFunction* ThisTickFunction) {
+void UHealthBarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
 }
 
