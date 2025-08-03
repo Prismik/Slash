@@ -6,6 +6,7 @@
 #include "Hittable.h"
 #include "GameFramework/Character.h"
 #include "Characters/CharacterTypes.h"
+#include "Enemy/FBehavior.h"
 #include "Enemy.generated.h"
 
 class UAnimMontage;
@@ -14,14 +15,20 @@ class UAttributes;
 class UHealthBarComponent;
 class AController;
 struct FDamageEvent;
+class AAIController;
+class UPawnSensingComponent;
+class AEnemyAiController;
 
 UCLASS()
 class SLASH_API AEnemy : public ACharacter, public IHittable {
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditAnywhere, Category = "Enemy|Properties")
+	FBehavior aiProperties;
+	
 	AEnemy();
-
+	
 	virtual void hit_Implementation(const FVector& p) override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -37,7 +44,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Enemy")
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Enemy")
 	EDeathPose deathPose = EDeathPose::EDP_alive;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Anim")
@@ -52,17 +59,14 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Enemy")
 	UParticleSystem* hitParticle;
 
-	UPROPERTY(VisibleAnywhere, meta=(AllowPrivateAccess=true), Category = "Enemy")
+	UPROPERTY(VisibleAnywhere, meta=(AllowPrivateAccess = "true"), Category = "Enemy")
 	UAttributes* attributes;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Enemy")
 	UHealthBarComponent* healthBar;
-
-	UPROPERTY(VisibleInstanceOnly, Category = "Enemy|Combat")
-	AActor* target;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess=true), Category = "Enemy|Combat")
-	double combatRadius = 350;
+	
+	UPROPERTY()
+	AEnemyAiController* aiController;
 	
 	void handleDeath();
 	FName computeDirectionalStruckSection(const FVector& p);

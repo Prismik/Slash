@@ -20,6 +20,7 @@ const FName AMainCharacter::HAND_SOCKET(FName("hand_r_socket"));
 const FName AMainCharacter::SPINE_SOCKET(FName("spine_socket"));
 const FName AMainCharacter::EQUIP_MONTAGE_SECTION(FName("equip"));
 const FName AMainCharacter::UNEQUIP_MONTAGE_SECTION(FName("unequip"));
+const FName AMainCharacter::MAIN_CHARACTER_TAG(FName("main_character"));
 
 AMainCharacter::AMainCharacter() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -100,6 +101,7 @@ void AMainCharacter::disarm() {
 void AMainCharacter::BeginPlay() {
 	Super::BeginPlay();
 
+	Tags.Add(MAIN_CHARACTER_TAG);
 	GetCharacterMovement()->MaxWalkSpeed = jogSpeed;
 }
 

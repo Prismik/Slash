@@ -2,11 +2,15 @@
 
 
 #include "Enemy/Enemy.h"
-#include "Kismet/GameplayStatics.h"
-#include "Components/SkeletalMeshComponent.h"
-#include "Components/CapsuleComponent.h"
+
+#include "FBehavior.h"
 #include "Characters/Components/Attributes.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Enemy/Components/EnemyAiController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "HUD/HealthBarComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 const FName AEnemy::STRUCT_FRONT_SECTION(FName("hitReact_front"));
 const FName AEnemy::STRUCK_LEFT_SECTION(FName("hitReact_left"));
@@ -27,6 +31,13 @@ AEnemy::AEnemy() {
 
 	healthBar = CreateDefaultSubobject<UHealthBarComponent>(FName("HealthBar"));
 	healthBar->SetupAttachment(GetRootComponent());
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	bUseControllerRotationPitch = bUseControllerRotationRoll = bUseControllerRotationYaw = false;
+
+	AIControllerClass = AEnemyAiController::StaticClass();
+
+	aiProperties = FBehavior();
 }
 
 void AEnemy::handleDeath() {
@@ -97,6 +108,8 @@ void AEnemy::BeginPlay() {
 	if (healthBar) {
 		healthBar->setHealthPercent(1.f);
 	}
+
+	aiController = Cast<AEnemyAiController>(GetController());
 }
 
 void AEnemy::playStruckMontage(const FName& section) {
@@ -118,13 +131,9 @@ void AEnemy::playDeathMontage(const FName& section) {
 void AEnemy::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
-	if (target) {
-		const double distanceFromTarget = (target->GetActorLocation() - GetActorLocation()).Length();
-		if (distanceFromTarget > combatRadius) {
-			target = nullptr;
-			if (healthBar) {
-				healthBar->SetVisibility(false);
-			}
+	if (!aiProperties.combatTarget) {
+		if (healthBar) {
+			healthBar->SetVisibility(false);
 		}
 	}
 }
@@ -145,7 +154,7 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 		healthBar->setHealthPercent(attributes->healthPercent());
 	}
 
-	target = EventInstigator->GetPawn();
+	aiController->startChasing(EventInstigator->GetPawn());
 	
 	return current - postDamage;
 }

@@ -25,8 +25,7 @@ ABreakable::ABreakable()
 	capsule->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 }
 
-void ABreakable::BeginPlay()
-{
+void ABreakable::BeginPlay() {
 	Super::BeginPlay();
 	geometryCollection->OnChaosBreakEvent.AddDynamic(this, &ABreakable::handleBreakEvent);
 }
@@ -62,4 +61,3 @@ void ABreakable::Tick(float DeltaTime)
 void ABreakable::hit_Implementation(const FVector& p) {
 	// Handled in handleBreakEvent now
 }
-

@@ -67,6 +67,7 @@ public:
 	
 	static const FName EQUIP_MONTAGE_SECTION;
 	static const FName UNEQUIP_MONTAGE_SECTION;
+	static const FName MAIN_CHARACTER_TAG;
 	
 protected:
 	virtual void BeginPlay() override;

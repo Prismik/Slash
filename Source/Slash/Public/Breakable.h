@@ -23,9 +23,9 @@ public:
 	virtual void hit_Implementation(const FVector& p) override;
 	
 protected:
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UCapsuleComponent* capsule;
-	
+
 	virtual void BeginPlay() override;
 	
 	UFUNCTION()
