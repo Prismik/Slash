@@ -12,9 +12,6 @@ class UHittable : public UInterface {
 	GENERATED_BODY()
 };
 
-/**
- * 
- */
 class SLASH_API IHittable {
 	GENERATED_BODY()
 

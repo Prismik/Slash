@@ -9,6 +9,7 @@
 #include "Enemy/FBehavior.h"
 #include "Enemy.generated.h"
 
+class UAnimOrchestrator;
 class UAnimMontage;
 class USoundBase;
 class UAttributes;
@@ -44,14 +45,11 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "Enemy")
+	UAnimOrchestrator* orchestrator;
+	
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Enemy")
 	EDeathPose deathPose = EDeathPose::EDP_alive;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Anim")
-	UAnimMontage* struckMontage;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Enemy|Anim")
-	UAnimMontage* deathMontage;
 	
 	UPROPERTY(EditAnywhere, Category = "Enemy")
 	USoundBase* hitSound;
@@ -69,7 +67,4 @@ private:
 	AEnemyAiController* aiController;
 	
 	void handleDeath();
-	FName computeDirectionalStruckSection(const FVector& p);
-	void playStruckMontage(const FName& section);
-	void playDeathMontage(const FName& section);
 };

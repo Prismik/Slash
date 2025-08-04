@@ -14,8 +14,7 @@ class SLASH_API UAttributes : public UActorComponent {
 public:
 	UAttributes();
 
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	
+	float takeDamage(float value);
 	void addHealth(float value);
 	void addEnergy(float value);
 	float healthRaw() { return health; }
@@ -24,9 +23,6 @@ public:
 	float energyPercent();
 
 	bool alive();
-	
-protected:
-	virtual void BeginPlay() override;
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess=true), Category="Attributes")

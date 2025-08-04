@@ -7,6 +7,8 @@
 #include "Interactable.h"
 #include "Animation/AnimMontage.h"
 #include "Camera/CameraComponent.h"
+#include "Characters/Components/AnimOrchestrator.h"
+#include "Characters/Components/Attributes.h"
 #include "Characters/Components/ComboTracker.h"
 #include "Characters/Components/Interactor.h"
 #include "Characters/Components/Inventory.h"
@@ -48,8 +50,18 @@ AMainCharacter::AMainCharacter() {
 	tracker = CreateDefaultSubobject<UComboTracker>(TEXT("ComboTracker"));
 	
 	inventory = CreateDefaultSubobject<UInventory>(TEXT("Inventory"));
+
+	orchestrator = CreateDefaultSubobject<UAnimOrchestrator>(TEXT("AnimOrchestrator"));
 	
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
+}
+
+void AMainCharacter::hit_Implementation(const FVector& p) {
+	if (attributes && attributes->alive()) {
+		
+	} else {
+		
+	}
 }
 
 void AMainCharacter::addOverlap(AInteractable* interactable) {
@@ -134,6 +146,11 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	input->BindAction(inputActions->jump, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 }
 
+float AMainCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
+	if (!attributes) return 0.f;
+	return attributes->takeDamage(DamageAmount);
+}
+
 void AMainCharacter::move(const FInputActionValue& Value) {
 	if (actionState != EActionState::EAS_unoccupied) return;
 	
@@ -187,29 +204,13 @@ void AMainCharacter::cycle(const FInputActionValue& Value) {
 	interactor->cycle();
 }
 
-void AMainCharacter::playAttackMontage() {
-	UAnimInstance* animInst = GetMesh()->GetAnimInstance();
-	UAnimMontage* montage = tracker->getMontage();
-	if (animInst == nullptr || montage == nullptr) return;
-
-	animInst->Montage_Play(montage);
-}
-
-void AMainCharacter::playArmingMontage(const FName& section) {
-	UAnimInstance* animInst = GetMesh()->GetAnimInstance();
-	if (animInst == nullptr || armingMontage == nullptr) return;
-
-	animInst->Montage_Play(armingMontage);
-	animInst->Montage_JumpToSection(section);
-}
-
 void AMainCharacter::attack(const FInputActionValue& Value) {
 	if (state == ECharacterState::ECS_unequipped) return;
 	if (actionState == EActionState::EAS_equipping) return;
 	if (!tracker->canProceed) { return; }
 	
 	actionState = EActionState::EAS_attacking;
-	playAttackMontage();
+	orchestrator->playAttack(tracker->getMontage());
 }
 
 void AMainCharacter::equip(const FInputActionValue& Value) {
@@ -223,5 +224,5 @@ void AMainCharacter::equip(const FInputActionValue& Value) {
 	state = state == ECharacterState::ECS_unequipped
 		? ECharacterState::ECS_equippedRightHand
 		: ECharacterState::ECS_unequipped;
-	playArmingMontage(section);
+	orchestrator->playArming(section);
 }

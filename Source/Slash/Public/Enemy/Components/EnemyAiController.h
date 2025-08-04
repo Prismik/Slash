@@ -26,11 +26,14 @@ public:
 	EEnemyState currentState();
 	
 	virtual void Tick(float DeltaTime) override;
-	
+
+	void death();
 	void moveToTarget(AActor* target);
 	AActor* updateCombatTarget();
 	void updatePatrolTarget();
 	void startChasing(AActor* target);
+	void startPatrolling();
+	void startAttacking();
 	
 protected:
 	virtual void BeginPlay() override;
@@ -49,6 +52,9 @@ private:
 	
 	UFUNCTION()
 	void onPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
+
+	UFUNCTION()
+	void onPerceptionForgotten(AActor* Actor);
 	
 	AEnemy* enemy;
 

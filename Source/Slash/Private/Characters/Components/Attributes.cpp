@@ -5,18 +5,16 @@
 
 
 UAttributes::UAttributes() {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 }
 
-void UAttributes::BeginPlay() {
-	Super::BeginPlay();
+float UAttributes::takeDamage(float value) {
+	float current = health;
+	addHealth(-value);
+	float postDamage = health;
 
-}
-
-void UAttributes::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	return current - postDamage;
 }
 
 void UAttributes::addHealth(float value) {

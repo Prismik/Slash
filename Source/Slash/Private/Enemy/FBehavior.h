@@ -9,6 +9,9 @@ struct FBehavior {
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	double combatRadius;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	double attackRadius;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	double patrolRadius;
 
@@ -31,5 +34,5 @@ struct FBehavior {
 	EEnemyState state = EEnemyState::EES_patrolling;
 	
 	FBehavior()
-	   : combatRadius(1000.f), patrolRadius(200.f), combatTarget(nullptr), patrolTarget(nullptr), minWaitTime(3.f), maxWaitTime(9.f) {}
+	   : combatRadius(1000.f), attackRadius(200.f), patrolRadius(200.f), combatTarget(nullptr), patrolTarget(nullptr), minWaitTime(3.f), maxWaitTime(9.f) {}
 };

@@ -3,10 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Hittable.h"
 #include "CharacterTypes.h"
 #include "GameFramework/Character.h"
 #include "MainCharacter.generated.h"
 
+class UAnimOrchestrator;
+struct FInputActionValue;
 class UInputDataConfig;
 class UInputMappingContext;
 class USpringArmComponent;
@@ -21,15 +24,17 @@ class ATreasure;
 class UAttributes;
 
 UCLASS()
-class SLASH_API AMainCharacter : public ACharacter
+class SLASH_API AMainCharacter : public ACharacter, public IHittable
 {
 	GENERATED_BODY()
 
 public:
 	AMainCharacter();
-	
+
+	virtual void hit_Implementation(const FVector& p) override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	void addOverlap(AInteractable* interactable);
 	void removeOverlap(AInteractable* interactable);
 	void collect(ATreasure* treasure);
@@ -52,9 +57,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="MainCharacter|Weapon")
 	UComboTracker* tracker;
-
-	UPROPERTY(EditDefaultsOnly, Category="MainCharacter|Anim")
-	UAnimMontage* armingMontage;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="MainCharacter|Inventory")
 	UInventory* inventory;
@@ -91,6 +93,9 @@ protected:
 	float sprintSpeed = 650.f;
 	
 private:
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "MainCharacter")
+	UAnimOrchestrator* orchestrator;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category="MainCharacter|Anim")
 	EActionState actionState = EActionState::EAS_unoccupied;
 	
@@ -126,7 +131,5 @@ private:
 	UFUNCTION()
 	void equip(const FInputActionValue& Value);
 	
-	void playAttackMontage();
-	void playArmingMontage(const FName& section);
 	void computeTargetSpringArmLength(const float axis);
 };
