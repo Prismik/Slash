@@ -10,13 +10,13 @@
 UComboTracker::UComboTracker() {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
 }
 
-void UComboTracker::assign(AWeapon* weapon) {
-	comboGenerator = weapon;
+void UComboTracker::assign(IComboGenerator* generator) {
+	comboGenerator = generator;
 	comboIndex = 0;
 }
 
@@ -25,7 +25,7 @@ void UComboTracker::initiate() {
 }
 
 void UComboTracker::track() {
-	uint8 max = comboGenerator->combos.Num();
+	uint8 max = comboGenerator->getCombos().Num();
 	comboIndex = (comboIndex + 1) % max;
 	canProceed = true;
 }
@@ -38,19 +38,6 @@ void UComboTracker::reset() {
 UAnimMontage* UComboTracker::getMontage() {
 	if (comboGenerator == nullptr) return nullptr;
 
-	return comboGenerator->combos[comboIndex];
-}
-
-void UComboTracker::BeginPlay() {
-	Super::BeginPlay();
-
-	// ...
-	
-}
-
-void UComboTracker::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
+	return comboGenerator->getCombos()[comboIndex];
 }
 

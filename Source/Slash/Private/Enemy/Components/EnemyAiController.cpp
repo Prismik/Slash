@@ -4,6 +4,7 @@
 #include "Enemy/Components/EnemyAiController.h"
 #include "Characters/MainCharacter.h"
 #include "Enemy/Enemy.h"
+#include "Enemy/Components/EnemyComboTracker.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Perception/AIPerceptionComponent.h"
@@ -53,7 +54,9 @@ void AEnemyAiController::BeginPlay() {
 	if (!aiProperties) {
 		aiProperties = &enemy->aiProperties;
 	}
-	
+
+	enemy->tracker->bindAttack(this, FName("attack"));
+	enemy->tracker->bindEndAttack(this, FName("attackEnd"));
 	moveToTarget(aiProperties->patrolTarget);
 }
 
@@ -76,11 +79,10 @@ bool AEnemyAiController::inTargetRange(AActor* target, double radius) {
 }
 
 void AEnemyAiController::onPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus) {
-	if (aiProperties->state == EEnemyState::EES_dead) return;
-	if (aiProperties->state == EEnemyState::EES_chasing) return;
+	if (isDead() || isChasing() || isEngaged()) return;
 	if (Stimulus.Type == UAISense::GetSenseID<UAISense_Sight>()) {
 		if (Stimulus.IsActive()) {
-			if (aiProperties->state != EEnemyState::EES_attacking && Actor->ActorHasTag(AMainCharacter::MAIN_CHARACTER_TAG)) {
+			if (!isAttacking() && Actor->ActorHasTag(AMainCharacter::MAIN_CHARACTER_TAG)) {
 				startChasing(Actor);
 			}
 		} else if (Stimulus.IsExpired()) {
@@ -95,7 +97,7 @@ void AEnemyAiController::onPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus
 }
 
 void AEnemyAiController::onPerceptionForgotten(AActor* Actor) {
-	if (aiProperties->state == EEnemyState::EES_dead) return;
+	if (isDead()) return;
 	UE_LOG(LogTemp, Display, TEXT("forgotten actor"));
 	startPatrolling();
 }
@@ -109,41 +111,84 @@ void AEnemyAiController::updatePatrolTarget() {
 }
 
 void AEnemyAiController::patrolTimerFinished() {
-	if (aiProperties->state == EEnemyState::EES_dead) return;
+	if (isDead()) return;
 	moveToTarget(aiProperties->patrolTarget);
 }
 
+bool AEnemyAiController::withinCombatRadius() {
+	return inTargetRange(aiProperties->combatTarget, aiProperties->combatRadius);
+}
+
+bool AEnemyAiController::withinAttackRadius() {
+	return inTargetRange(aiProperties->combatTarget, aiProperties->attackRadius);
+}
+
+bool AEnemyAiController::isChasing() {
+	return aiProperties->state == EEnemyState::EES_chasing;
+}
+
+bool AEnemyAiController::isAttacking() {
+	return aiProperties->state == EEnemyState::EES_attacking;
+}
+
+bool AEnemyAiController::isPatrolling() {
+	return aiProperties->state == EEnemyState::EES_patrolling;
+}
+
+bool AEnemyAiController::isEngaged() {
+	return aiProperties->state == EEnemyState::EES_engaged;
+}
+
+bool AEnemyAiController::isDead() {
+	return aiProperties->state == EEnemyState::EES_dead;
+}
+
 void AEnemyAiController::startChasing(AActor* target) {
-	if (!target || aiProperties->state == EEnemyState::EES_chasing) return;
+	if (!target || isChasing()) return;
+	enemy->tracker->reset();
+	
+	if (isEngaged()) return;
 	aiProperties->state = EEnemyState::EES_chasing;
 	GetWorldTimerManager().ClearTimer(patrolTimer);
-	enemy->GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	enemy->GetCharacterMovement()->MaxWalkSpeed = aiProperties->chasingSpeed;
 	aiProperties->combatTarget = target;
 	moveToTarget(target);
 	UE_LOG(LogTemp, Display, TEXT("%s seen by: %s"), *target->GetName(), *GetName());
 }
 
 void AEnemyAiController::startPatrolling() {
-	if (aiProperties->state == EEnemyState::EES_patrolling) return;
+	if (isPatrolling()) return;
+	enemy->tracker->reset();
+
+	if (isEngaged()) return;
 	aiProperties->combatTarget = nullptr;
 	aiProperties->state = EEnemyState::EES_patrolling;
-	enemy->GetCharacterMovement()->MaxWalkSpeed = 125.f;
+	enemy->GetCharacterMovement()->MaxWalkSpeed = aiProperties->patrolSpeed;
 	moveToTarget(aiProperties->patrolTarget);
 	UE_LOG(LogTemp, Display, TEXT("started patrolling"));
 }
 
 void AEnemyAiController::startAttacking() {
-	if (aiProperties->state == EEnemyState::EES_attacking) return;
+	if (isAttacking() || isEngaged()) return;
 	aiProperties->state = EEnemyState::EES_attacking;
-	// trigger montage on enemy var
+	enemy->tracker->startTimer();
 	UE_LOG(LogTemp, Display, TEXT("started attacking %s"), *aiProperties->combatTarget->GetName());
+}
+
+void AEnemyAiController::attackEnd() {
+	aiProperties->state = EEnemyState::EES_attacking;
+}
+
+void AEnemyAiController::attack() {
+	aiProperties->state = EEnemyState::EES_engaged;
+	enemy->handleAttack();
 }
 
 void AEnemyAiController::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
-	if (aiProperties->state == EEnemyState::EES_dead) return;
-	if (aiProperties->state == EEnemyState::EES_patrolling) {
+	if (isDead()) return;
+	if (isPatrolling()) {
 		updatePatrolTarget();
 	} else {
 		updateCombatTarget();
@@ -159,20 +204,20 @@ void AEnemyAiController::death() {
 }
 
 void AEnemyAiController::moveToTarget(AActor* target) {
-	if (!target) return;
+	if (!target || isEngaged()) return;
 	FAIMoveRequest request;
 	request.SetGoalActor(target);
-	request.SetAcceptanceRadius(15.f);
+	request.SetAcceptanceRadius(55.f);
 	MoveTo(request);
 }
 
 AActor* AEnemyAiController::updateCombatTarget() {
-	if (!inTargetRange(aiProperties->combatTarget, aiProperties->combatRadius)) {
+	if (!withinCombatRadius()) {
 		startPatrolling();
-	} else if (!inTargetRange(aiProperties->combatTarget, aiProperties->attackRadius)) {
+	} else if (!withinAttackRadius()) {
 		// Outside of attack range, start chasing
 		startChasing(aiProperties->combatTarget);
-	} else if (inTargetRange(aiProperties->combatTarget, aiProperties->attackRadius)) {
+	} else if (withinAttackRadius()) {
 		startAttacking();
 	}
 	

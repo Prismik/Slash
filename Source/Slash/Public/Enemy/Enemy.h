@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ComboGenerator.h"
 #include "Hittable.h"
 #include "GameFramework/Character.h"
 #include "Characters/CharacterTypes.h"
@@ -19,14 +20,18 @@ struct FDamageEvent;
 class AAIController;
 class UPawnSensingComponent;
 class AEnemyAiController;
+class UEnemyComboTracker;
 
 UCLASS()
-class SLASH_API AEnemy : public ACharacter, public IHittable {
+class SLASH_API AEnemy : public ACharacter, public IHittable, public IComboGenerator {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, Category = "Enemy|Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy|Properties")
 	FBehavior aiProperties;
+	
+	UPROPERTY(BlueprintReadOnly, Category="Enemy|Combat")
+	UEnemyComboTracker* tracker;
 	
 	AEnemy();
 	
@@ -34,6 +39,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	virtual TArray<UAnimMontage*> getCombos() override;
+
+	void handleAttack();
 
 	// Consts
 	static const FName STRUCT_FRONT_SECTION;
@@ -49,7 +57,7 @@ private:
 	UAnimOrchestrator* orchestrator;
 	
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Enemy")
-	EDeathPose deathPose = EDeathPose::EDP_alive;
+	EDeathPose deathPose = EDeathPose::EDP_death1;
 	
 	UPROPERTY(EditAnywhere, Category = "Enemy")
 	USoundBase* hitSound;
@@ -65,6 +73,9 @@ private:
 	
 	UPROPERTY()
 	AEnemyAiController* aiController;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category = "Enemy|Combat")
+	TArray<UAnimMontage*> combos;
 	
 	void handleDeath();
 };

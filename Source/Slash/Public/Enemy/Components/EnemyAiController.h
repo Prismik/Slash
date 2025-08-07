@@ -35,6 +35,12 @@ public:
 	void startPatrolling();
 	void startAttacking();
 	
+	UFUNCTION()
+	void attack();
+
+	UFUNCTION()
+	void attackEnd();
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnPossess(APawn* InPawn) override;
@@ -62,5 +68,17 @@ private:
 	
 	FTimerHandle patrolTimer;
 	void patrolTimerFinished();
+	
+	FTimerHandle attackTimer;
+	void attackTimerFinished();
+	
 	FBehavior* aiProperties;
+
+	bool withinCombatRadius();
+	bool withinAttackRadius();
+	bool isChasing();
+	bool isAttacking();
+	bool isPatrolling();
+	bool isEngaged();
+	bool isDead();
 };

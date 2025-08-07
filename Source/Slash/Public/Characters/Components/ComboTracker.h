@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ComboGenerator.h"
 #include "Components/ActorComponent.h"
 #include "ComboTracker.generated.h"
 
@@ -16,28 +17,23 @@ public:
 	// Sets default values for this component's properties
 	UComboTracker();
 	
-	void assign(AWeapon* weapon);
+	void assign(IComboGenerator* generator);
 
 	UFUNCTION(BlueprintCallable)
-	void initiate();
+	virtual void initiate();
 	
 	UFUNCTION(BlueprintCallable)
-	void track();
+	virtual void track();
 	
 	UFUNCTION(BlueprintCallable)
-	void reset();
+	virtual void reset();
 
 	UAnimMontage* getMontage();
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = Combo)
 	bool canProceed = true;
 	
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	
-protected:
-	virtual void BeginPlay() override;
-
 private:
-	AWeapon* comboGenerator;
+	IComboGenerator* comboGenerator;
 	uint8 comboIndex = 0;
 };

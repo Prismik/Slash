@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ComboGenerator.h"
 #include "Items/Item.h"
 #include "Weapon.generated.h"
 
@@ -11,7 +12,7 @@ class UMetaSoundSource;
 class UBoxComponent;
 
 UCLASS()
-class SLASH_API AWeapon : public AItem
+class SLASH_API AWeapon : public AItem, public IComboGenerator
 {
 	GENERATED_BODY()
 
@@ -20,15 +21,13 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Type")
 	bool twoHanded = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Combo")
-	TArray<UAnimMontage*> combos;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Audio")
 	USoundBase* equipSound;
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual void interact_Implementation(AMainCharacter* character) override;
+	virtual TArray<UAnimMontage*> getCombos() override;
 	
 	void equip(AMainCharacter* character);
 	void unequip(AMainCharacter* character);
@@ -72,4 +71,8 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float baseDamage = 20;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category = "Weapon|Combo")
+	TArray<UAnimMontage*> combos;
+	
 };

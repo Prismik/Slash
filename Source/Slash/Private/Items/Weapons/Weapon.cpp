@@ -160,3 +160,7 @@ void AWeapon::attach(UMeshComponent* toTarget, FName socket) {
 
 	sphere->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
 }
+
+TArray<UAnimMontage*> AWeapon::getCombos() {
+	return combos;
+}

@@ -6,9 +6,11 @@
 #include "FBehavior.h"
 #include "Characters/Components/AnimOrchestrator.h"
 #include "Characters/Components/Attributes.h"
+#include "Characters/Components/ComboTracker.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Enemy/Components/EnemyAiController.h"
+#include "Enemy/Components/EnemyComboTracker.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HUD/HealthBarComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -29,7 +31,8 @@ AEnemy::AEnemy() {
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 
 	attributes = CreateDefaultSubobject<UAttributes>(FName("Attributes"));
-
+	tracker = CreateDefaultSubobject<UEnemyComboTracker>(TEXT("ComboTracker"));
+	
 	healthBar = CreateDefaultSubobject<UHealthBarComponent>(FName("HealthBar"));
 	healthBar->SetupAttachment(GetRootComponent());
 	
@@ -59,7 +62,7 @@ void AEnemy::handleDeath() {
 		orchestrator->playDeath(FName("death2"));
 		break;
 	default:
-		deathPose = EDeathPose::EDP_alive;
+		deathPose = EDeathPose::EDP_death1;
 		break;
 	}
 		
@@ -94,6 +97,8 @@ void AEnemy::BeginPlay() {
 		healthBar->setHealthPercent(1.f);
 	}
 
+	
+	tracker->assign(this);
 	aiController = Cast<AEnemyAiController>(GetController());
 }
 
@@ -126,3 +131,15 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	return damageTaken;
 }
 
+TArray<UAnimMontage*> AEnemy::getCombos() {
+	return combos;
+}
+
+void AEnemy::handleAttack() {
+	if (attributes && !attributes->alive()) return;
+	
+	UAnimMontage* montage = tracker->getMontage();
+	if (montage) {
+		orchestrator->playAttack(montage);
+	}
+}
