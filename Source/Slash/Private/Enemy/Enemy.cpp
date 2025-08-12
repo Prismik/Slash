@@ -13,12 +13,10 @@
 #include "Enemy/Components/EnemyComboTracker.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HUD/HealthBarComponent.h"
+#include "Items/Weapons/Weapon.h"
 #include "Kismet/GameplayStatics.h"
 
-const FName AEnemy::STRUCT_FRONT_SECTION(FName("hitReact_front"));
-const FName AEnemy::STRUCK_LEFT_SECTION(FName("hitReact_left"));
-const FName AEnemy::STRUCK_RIGHT_SECTION(FName("hitReact_right"));
-const FName AEnemy::STRUCK_BACK_SECTION(FName("hitReact_back"));
+const FName AEnemy::ENEMY_TAG(FName("enemy"));
 
 AEnemy::AEnemy() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -30,7 +28,6 @@ AEnemy::AEnemy() {
 	
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 
-	attributes = CreateDefaultSubobject<UAttributes>(FName("Attributes"));
 	tracker = CreateDefaultSubobject<UEnemyComboTracker>(TEXT("ComboTracker"));
 	
 	healthBar = CreateDefaultSubobject<UHealthBarComponent>(FName("HealthBar"));
@@ -47,31 +44,23 @@ AEnemy::AEnemy() {
 }
 
 void AEnemy::handleDeath() {
-	const uint32 rng = FMath::RandRange(0, 2);
-	switch (rng) {
-	case 0:
-		deathPose = EDeathPose::EDP_death1;
-		orchestrator->playDeath(FName("death1"));
-		break;
-	case 1:
-		deathPose = EDeathPose::EDP_death2;
-		orchestrator->playDeath(FName("death2"));
-		break;
-	case 2:
-		deathPose = EDeathPose::EDP_death3;
-		orchestrator->playDeath(FName("death2"));
-		break;
-	default:
-		deathPose = EDeathPose::EDP_death1;
-		break;
-	}
-		
+	Super::handleDeath();
+	
+	tracker->reset();
+	deathPose = orchestrator->playDeath();
 	SetLifeSpan(15.0);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	healthBar->SetVisibility(false);
 	aiController->death();
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+}
+
+void AEnemy::spawnStruckParticles(const FVector& p) {
+	if (hitParticle) {
+		UGameplayStatics::SpawnEmitterAtLocation(this, hitParticle, p);
+	}
 }
 
 void AEnemy::hit_Implementation(const FVector& p) {
@@ -79,11 +68,10 @@ void AEnemy::hit_Implementation(const FVector& p) {
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), hitSound, p);
 	}
 
-	if (hitParticle) {
-		UGameplayStatics::SpawnEmitterAtLocation(this, hitParticle, p);
-	}
+	spawnStruckParticles(p);
 
 	if (attributes && attributes->alive()) {
+		if (aiProperties.state == EEnemyState::EES_engaged) return;
 		orchestrator->playStruck(p);
 	} else {
 		handleDeath();
@@ -93,28 +81,21 @@ void AEnemy::hit_Implementation(const FVector& p) {
 void AEnemy::BeginPlay() {
 	Super::BeginPlay();
 
+	aiController = Cast<AEnemyAiController>(GetController());
 	if (healthBar) {
-		healthBar->setHealthPercent(1.f);
+		healthBar->setHealthPercent(attributes->healthPercent());
 	}
-
 	
 	tracker->assign(this);
-	aiController = Cast<AEnemyAiController>(GetController());
+	Tags.Add(ENEMY_TAG);
 }
 
 void AEnemy::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
-	if (!aiProperties.combatTarget) {
-		if (healthBar) {
-			healthBar->SetVisibility(false);
-		}
+	if (!aiProperties.combatTarget && healthBar) {
+		healthBar->SetVisibility(false);
 	}
-}
-
-void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
@@ -137,9 +118,5 @@ TArray<UAnimMontage*> AEnemy::getCombos() {
 
 void AEnemy::handleAttack() {
 	if (attributes && !attributes->alive()) return;
-	
-	UAnimMontage* montage = tracker->getMontage();
-	if (montage) {
-		orchestrator->playAttack(montage);
-	}
+	orchestrator->playAttack(tracker->getMontage());
 }

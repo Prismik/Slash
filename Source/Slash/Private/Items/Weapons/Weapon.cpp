@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
+#include "Enemy/Enemy.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Particles/ParticleSystemComponent.h"
 
@@ -31,39 +32,36 @@ AWeapon::AWeapon() {
 	trailParticleEmitter->bAutoActivate = false;
 }
 
-void AWeapon::sphereOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	Super::sphereOverlapBegin(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
-
-}
-
-void AWeapon::sphereOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
-	Super::sphereOverlapEnd(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
-	
-}
-
-void AWeapon::boxOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+void AWeapon::boxTrace(FHitResult& result) {
 	const FVector from = boxTraceOrigin->GetComponentLocation();
 	const FVector to = boxTraceDestination->GetComponentLocation();
 	
-	FHitResult result;
 	UKismetSystemLibrary::BoxTraceSingle(
 		this,
 		from,
 		to,
-		FVector(5.f, 5.f, 5.f),
+		boxTraceExtent,
 		boxTraceOrigin->GetComponentRotation(),
 		ETraceTypeQuery::TraceTypeQuery1,
 		false,
 		ignoredActors,
-		EDrawDebugTrace::Type::None,
+		boxTraceDebugEnabled ? EDrawDebugTrace::Type::ForDuration : EDrawDebugTrace::Type::None,
 		result,
 		true
-		);
+	);
+}
+
+void AWeapon::boxOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+	if (GetOwner()->ActorHasTag(AEnemy::ENEMY_TAG) && OtherActor->ActorHasTag(AEnemy::ENEMY_TAG)) return;
+	FHitResult result;
+	boxTrace(result);
 
 	AActor* actor = result.GetActor();
 	if (actor != nullptr) {
+		if (GetOwner()->ActorHasTag(AEnemy::ENEMY_TAG) && actor->ActorHasTag(AEnemy::ENEMY_TAG)) return;
 		IHittable* hittable = Cast<IHittable>(actor);
 		if (hittable != nullptr) {
+			UE_LOG(LogTemp, Display, TEXT("MC was cast as hittable!!"));
 			UGameplayStatics::ApplyDamage(actor, baseDamage, GetInstigator()->GetController(), this, UDamageType::StaticClass());
 			IHittable::Execute_hit(actor, result.ImpactPoint);
 			ignoredActors.AddUnique(actor);
@@ -106,6 +104,7 @@ void AWeapon::setBoxCollision(bool enabled) {
 		trailParticleEmitter->BeginTrails(TRAIL_START_SOCKET, TRAIL_END_SOCKET, ETrailWidthMode_FromCentre, 1.f);
 	} else {
 		ignoredActors.Empty();
+		ignoredActors.AddUnique(GetOwner());
 		trailParticleEmitter->EndTrails();
 		trailParticleEmitter->DeactivateSystem();
 	}
@@ -126,12 +125,8 @@ void AWeapon::equip(AMainCharacter* character) {
 	if (equipSound) {
 		UGameplayStatics::PlaySoundAtLocation(this, equipSound, GetActorLocation());
 	}
-		
-	UMeshComponent* characterMesh = character->GetMesh();
-	attach(characterMesh, AMainCharacter::HAND_SOCKET);
 	
-	SetOwner(character);
-	SetInstigator(character);
+	attach(character, ABaseCharacter::RIGHT_HAND_SOCKET);
 	
 	// Clear interactable highlight
 	mesh->SetOverlayMaterial(nullptr);
@@ -150,15 +145,22 @@ void AWeapon::unequip(AMainCharacter* character) {
 	
 }
 
-void AWeapon::attach(UMeshComponent* toTarget, FName socket) {
+void AWeapon::attach(ABaseCharacter* toTarget, FName socket) {
+	UMeshComponent* characterMesh = toTarget->GetMesh();
+		
+	SetOwner(toTarget);
+	SetInstigator(toTarget);
+	
 	// First detach from current, then attach to target
 	const FDetachmentTransformRules detachRules = FDetachmentTransformRules(EDetachmentRule::KeepWorld, true);
 	mesh->DetachFromComponent(detachRules);
 	
 	const FAttachmentTransformRules attachRules = FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true);
-	mesh->AttachToComponent(toTarget, attachRules, socket);
+	mesh->AttachToComponent(characterMesh, attachRules, socket);
 
 	sphere->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
+
+	ignoredActors.AddUnique(toTarget);
 }
 
 TArray<UAnimMontage*> AWeapon::getCombos() {

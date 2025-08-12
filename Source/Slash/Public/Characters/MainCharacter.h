@@ -3,11 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BaseCharacter.h"
 #include "Hittable.h"
 #include "CharacterTypes.h"
-#include "GameFramework/Character.h"
 #include "MainCharacter.generated.h"
 
+class ABaseCharacter;
 class UAnimOrchestrator;
 struct FInputActionValue;
 class UInputDataConfig;
@@ -24,11 +25,31 @@ class ATreasure;
 class UAttributes;
 
 UCLASS()
-class SLASH_API AMainCharacter : public ACharacter, public IHittable
+class SLASH_API AMainCharacter : public ABaseCharacter, public IHittable
 {
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(VisibleAnywhere, Category="MainCharacter|Movement")
+	bool sprintToggled = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="MainCharacter|Anim")
+	ECharacterState state = ECharacterState::ECS_unequipped;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="MainCharacter|Weapon")
+	AWeapon* equippedWeapon;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="MainCharacter|Weapon")
+	UComboTracker* tracker;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="MainCharacter|Inventory")
+	UInventory* inventory;
+	
+	static const FName SPINE_SOCKET;
+	static const FName EQUIP_MONTAGE_SECTION;
+	static const FName UNEQUIP_MONTAGE_SECTION;
+	static const FName MAIN_CHARACTER_TAG;
+	
 	AMainCharacter();
 
 	virtual void hit_Implementation(const FVector& p) override;
@@ -46,34 +67,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void disarm();
 	
-	UPROPERTY(VisibleAnywhere, Category="MainCharacter|Movement")
-	bool sprintToggled = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="MainCharacter|Anim")
-	ECharacterState state = ECharacterState::ECS_unequipped;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="MainCharacter|Weapon")
-	AWeapon* equippedWeapon;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="MainCharacter|Weapon")
-	UComboTracker* tracker;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="MainCharacter|Inventory")
-	UInventory* inventory;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category="MainCharacter|Inventory")
-	UAttributes* attributes;
-	
-	static const FName HAND_SOCKET;
-	static const FName SPINE_SOCKET;
-	
-	static const FName EQUIP_MONTAGE_SECTION;
-	static const FName UNEQUIP_MONTAGE_SECTION;
-	static const FName MAIN_CHARACTER_TAG;
-	
 protected:
-	virtual void BeginPlay() override;
-	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="MainCharacter|EnhancedInput")
 	UInputMappingContext* inputMapping;
 	
@@ -92,10 +86,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MainCharacter|Movement")
 	float sprintSpeed = 650.f;
 	
-private:
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "MainCharacter")
-	UAnimOrchestrator* orchestrator;
+	virtual void BeginPlay() override;
 	
+private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category="MainCharacter|Anim")
 	EActionState actionState = EActionState::EAS_unoccupied;
 	

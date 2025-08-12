@@ -5,25 +5,28 @@
 #include "CoreMinimal.h"
 #include "ComboGenerator.h"
 #include "Hittable.h"
+#include "Characters/BaseCharacter.h"
 #include "GameFramework/Character.h"
 #include "Characters/CharacterTypes.h"
 #include "Enemy/FBehavior.h"
 #include "Enemy.generated.h"
 
+class AAIController;
+class ABaseCharacter;
+class AController;
+class AEnemyAiController;
+class AWeapon;
+struct FDamageEvent;
 class UAnimOrchestrator;
 class UAnimMontage;
-class USoundBase;
 class UAttributes;
-class UHealthBarComponent;
-class AController;
-struct FDamageEvent;
-class AAIController;
-class UPawnSensingComponent;
-class AEnemyAiController;
 class UEnemyComboTracker;
+class UHealthBarComponent;
+class UPawnSensingComponent;
+class USoundBase;
 
 UCLASS()
-class SLASH_API AEnemy : public ACharacter, public IHittable, public IComboGenerator {
+class SLASH_API AEnemy : public ABaseCharacter, public IHittable, public IComboGenerator {
 	GENERATED_BODY()
 
 public:
@@ -37,37 +40,21 @@ public:
 	
 	virtual void hit_Implementation(const FVector& p) override;
 	virtual void Tick(float DeltaTime) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	virtual TArray<UAnimMontage*> getCombos() override;
 
 	void handleAttack();
 
-	// Consts
-	static const FName STRUCT_FRONT_SECTION;
-	static const FName STRUCK_LEFT_SECTION;
-	static const FName STRUCK_RIGHT_SECTION;
-	static const FName STRUCK_BACK_SECTION;
+	static const FName ENEMY_TAG;
 	
 protected:
 	virtual void BeginPlay() override;
+	virtual void handleDeath() override;
 
 private:
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "Enemy")
-	UAnimOrchestrator* orchestrator;
-	
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Enemy")
-	EDeathPose deathPose = EDeathPose::EDP_death1;
+	EDeathPose deathPose;
 	
-	UPROPERTY(EditAnywhere, Category = "Enemy")
-	USoundBase* hitSound;
-
-	UPROPERTY(EditAnywhere, Category = "Enemy")
-	UParticleSystem* hitParticle;
-
-	UPROPERTY(VisibleAnywhere, meta=(AllowPrivateAccess = "true"), Category = "Enemy")
-	UAttributes* attributes;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Enemy")
 	UHealthBarComponent* healthBar;
 	
@@ -76,6 +63,12 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category = "Enemy|Combat")
 	TArray<UAnimMontage*> combos;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category="Enemy|Weapon")
+	AWeapon* leftHandWeapon;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category="Enemy|Weapon")
+	AWeapon* rightHandWeapon;
 	
-	void handleDeath();
+	void spawnStruckParticles(const FVector& p);
 };

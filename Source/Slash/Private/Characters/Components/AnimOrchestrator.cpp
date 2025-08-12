@@ -14,36 +14,25 @@ UAnimOrchestrator::UAnimOrchestrator() {
 
 }
 
-void UAnimOrchestrator::playArming(const FName& section) {
-	UAnimInstance* animInst = animated->GetMesh()->GetAnimInstance();
-	if (animInst == nullptr || armingMontage == nullptr) return;
-
-	animInst->Montage_Play(armingMontage);
-	animInst->Montage_JumpToSection(section);
+void UAnimOrchestrator::playArming(FName section) {
+	playMontage(armingMontage, &section);
 }
 
 void UAnimOrchestrator::playAttack(UAnimMontage* montage) {
-	UAnimInstance* animInst = animated->GetMesh()->GetAnimInstance();
-	if (animInst == nullptr || montage == nullptr) return;
-
-	animInst->Montage_Play(montage);
+	playMontage(montage);
 }
 
 void UAnimOrchestrator::playStruck(const FVector& p) {
-	UAnimInstance* animInst = animated->GetMesh()->GetAnimInstance();
-	if (animInst == nullptr || struckMontage == nullptr) return;
-	
-	animInst->Montage_Play(struckMontage);
-	animInst->Montage_JumpToSection(computeDirectionalStruckSection(p), struckMontage);
-}
-void UAnimOrchestrator::playDeath(const FName& section) {
-	UAnimInstance* animInst = animated->GetMesh()->GetAnimInstance();
-	if (animInst == nullptr || deathMontage == nullptr) return;
-
-	animInst->Montage_Play(deathMontage);
-	animInst->Montage_JumpToSection(section, deathMontage);
+	FName section = computeDirectionalStruckSection(p);
+	playMontage(struckMontage, &section);
 }
 
+EDeathPose UAnimOrchestrator::playDeath() {
+	const uint8 rng = playMontage(deathMontage, deathMontageSections);
+	return rng >= static_cast<uint8>(EDeathPose::EDP_max)
+		? EDeathPose::EDP_max
+		: static_cast<EDeathPose>(rng);
+}
 
 void UAnimOrchestrator::BeginPlay() {
 	Super::BeginPlay();
@@ -68,4 +57,25 @@ FName UAnimOrchestrator::computeDirectionalStruckSection(const FVector& p) {
 	}
 
 	return section;
+}
+
+void UAnimOrchestrator::playMontage(UAnimMontage* montage, FName* section) {
+	UAnimInstance* animInst = animated->GetMesh()->GetAnimInstance();
+	if (animInst == nullptr || montage == nullptr) return;
+	animInst->Montage_Play(montage);
+	
+	if (!section) return;
+	animInst->Montage_JumpToSection(*section, deathMontage);
+}
+
+void UAnimOrchestrator::playMontage(UAnimMontage* montage) {
+	playMontage(montage, nullptr);
+}
+
+uint8 UAnimOrchestrator::playMontage(UAnimMontage* montage, const TArray<FName>& sections) {
+	if (sections.IsEmpty()) return 0;
+	const uint32 rng = FMath::RandRange(0, sections.Num() - 1);
+	FName section = sections[rng];
+	playMontage(montage, &section);
+	return rng;
 }

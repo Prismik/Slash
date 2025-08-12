@@ -17,8 +17,8 @@
 #include "Input/InputDataConfig.h"
 #include "Items/Treasure.h"
 #include "Items/Weapons/Weapon.h"
+#include "Kismet/GameplayStatics.h"
 
-const FName AMainCharacter::HAND_SOCKET(FName("hand_r_socket"));
 const FName AMainCharacter::SPINE_SOCKET(FName("spine_socket"));
 const FName AMainCharacter::EQUIP_MONTAGE_SECTION(FName("equip"));
 const FName AMainCharacter::UNEQUIP_MONTAGE_SECTION(FName("unequip"));
@@ -34,6 +34,12 @@ AMainCharacter::AMainCharacter() {
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
+
+	GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	GetMesh()->SetCollisionResponseToAllChannels(ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
+	GetMesh()->SetGenerateOverlapEvents(true);
 	
 	springArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
 	springArm->SetupAttachment(GetRootComponent());
@@ -48,17 +54,21 @@ AMainCharacter::AMainCharacter() {
 	interactor->character = this;
 
 	tracker = CreateDefaultSubobject<UComboTracker>(TEXT("ComboTracker"));
-	
 	inventory = CreateDefaultSubobject<UInventory>(TEXT("Inventory"));
-
 	orchestrator = CreateDefaultSubobject<UAnimOrchestrator>(TEXT("AnimOrchestrator"));
 	
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
 
 void AMainCharacter::hit_Implementation(const FVector& p) {
+	UE_LOG(LogTemp, Display, TEXT("MC was hit!"));
 	if (attributes && attributes->alive()) {
-		
+		if (hitSound) {
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), hitSound, p);
+		}
+		if (hitParticle) {
+			UGameplayStatics::SpawnEmitterAtLocation(this, hitParticle, p);
+		}
 	} else {
 		
 	}
@@ -90,24 +100,19 @@ void AMainCharacter::setWeapon(AWeapon* weapon) {
 	}
 
 	interactor->remove(weapon);
-	
-	if (weapon->twoHanded) {
-		state = ECharacterState::ECS_equippedTwoHanded;
-	} else {
-		state = ECharacterState::ECS_equippedRightHand;
-	}
+	state = weapon->twoHanded
+		? ECharacterState::ECS_equippedTwoHanded
+		: ECharacterState::ECS_equippedRightHand;
 }
 
 void AMainCharacter::arm() {
 	if (!equippedWeapon) return;
-	
-	equippedWeapon->attach(this->GetMesh(), HAND_SOCKET);
+	equippedWeapon->attach(this, RIGHT_HAND_SOCKET);
 }
 
 void AMainCharacter::disarm() {
 	if (!equippedWeapon) return;
-	
-	equippedWeapon->attach(this->GetMesh(), SPINE_SOCKET);
+	equippedWeapon->attach(this, SPINE_SOCKET);
 }
 
 void AMainCharacter::BeginPlay() {
@@ -148,6 +153,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 float AMainCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
 	if (!attributes) return 0.f;
+	UE_LOG(LogTemp, Display, TEXT("MC took some damage!"));
 	return attributes->takeDamage(DamageAmount);
 }
 
@@ -179,11 +185,6 @@ void AMainCharacter::zoom(const FInputActionValue& Value) {
 	computeTargetSpringArmLength(val);
 }
 
-void AMainCharacter::computeTargetSpringArmLength(const float axis) {
-	float unclampedDestination = (-50 * axis) + springArm->TargetArmLength;
-	targetArmLength = FMath::Clamp(unclampedDestination, minArmLength, maxArmLength);
-}
-
 void AMainCharacter::sprint(const FInputActionValue& Value) {
 	bool val = Value.Get<bool>();
 	sprintToggled = val;
@@ -191,23 +192,17 @@ void AMainCharacter::sprint(const FInputActionValue& Value) {
 }
 
 void AMainCharacter::interact(const FInputActionValue& Value) {
-	bool val = Value.Get<bool>();
-	if (!val) { return; }
-
 	interactor->interact();
 }
 
 void AMainCharacter::cycle(const FInputActionValue& Value) {
-	bool val = Value.Get<bool>();
-	if (!val) { return; }
-
 	interactor->cycle();
 }
 
 void AMainCharacter::attack(const FInputActionValue& Value) {
 	if (state == ECharacterState::ECS_unequipped) return;
 	if (actionState == EActionState::EAS_equipping) return;
-	if (!tracker->canProceed) { return; }
+	if (!tracker->canProceed) return;
 	
 	actionState = EActionState::EAS_attacking;
 	orchestrator->playAttack(tracker->getMontage());
@@ -225,4 +220,9 @@ void AMainCharacter::equip(const FInputActionValue& Value) {
 		? ECharacterState::ECS_equippedRightHand
 		: ECharacterState::ECS_unequipped;
 	orchestrator->playArming(section);
+}
+
+void AMainCharacter::computeTargetSpringArmLength(const float axis) {
+	float unclampedDestination = (-50 * axis) + springArm->TargetArmLength;
+	targetArmLength = FMath::Clamp(unclampedDestination, minArmLength, maxArmLength);
 }

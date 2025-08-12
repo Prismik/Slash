@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Characters/CharacterTypes.h"
 #include "Components/ActorComponent.h"
 #include "AnimOrchestrator.generated.h"
 
@@ -15,11 +16,12 @@ public:
 	// Sets default values for this component's properties
 	UAnimOrchestrator();
 
-	void playArming(const FName& section);
+	void playArming(FName section);
 	void playAttack(UAnimMontage* montage);
 	/// Play struck animation from a hit point
 	void playStruck(const FVector& p);
-	void playDeath(const FName& section);
+	/// Play a random death animation and return the chosen pose
+	EDeathPose playDeath();
 	
 	// Consts
 	static const FName STRUCT_FRONT_SECTION;
@@ -34,7 +36,10 @@ private:
 	ACharacter* animated;
 	
 	FName computeDirectionalStruckSection(const FVector& p);
-
+	void playMontage(UAnimMontage* montage, FName* section);
+	void playMontage(UAnimMontage* montage);
+	uint8 playMontage(UAnimMontage* montage, const TArray<FName>& sections);
+	
 	// Montages
 	UPROPERTY(EditDefaultsOnly, Category="Anim montages")
 	UAnimMontage* armingMontage;
@@ -42,7 +47,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Anim montages")
 	UAnimMontage* struckMontage;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Anim montages")
+	UPROPERTY(EditDefaultsOnly, Category = "Anim montages|Death")
 	UAnimMontage* deathMontage;
-	
+
+	UPROPERTY(EditDefaultsOnly, Category = "Anim montages|Death")
+	TArray<FName> deathMontageSections;
 };

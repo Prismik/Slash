@@ -12,7 +12,6 @@ UEnemyComboTracker::UEnemyComboTracker() {
 
 void UEnemyComboTracker::BeginPlay() {
 	Super::BeginPlay();
-
 	
 }
 

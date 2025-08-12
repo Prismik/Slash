@@ -18,7 +18,7 @@ class SLASH_API AWeapon : public AItem, public IComboGenerator
 
 public:
 	AWeapon();
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Type")
 	bool twoHanded = false;
 	
@@ -32,7 +32,8 @@ public:
 	void equip(AMainCharacter* character);
 	void unequip(AMainCharacter* character);
 
-	void attach(UMeshComponent* toTarget, FName socket);
+	UFUNCTION(BlueprintCallable)
+	void attach(ABaseCharacter* toTarget, FName socket);
 
 	UFUNCTION(BlueprintCallable)
 	void setBoxCollision(bool enabled);
@@ -43,9 +44,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	
-	virtual void sphereOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
-	virtual void sphereOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
-
 	UFUNCTION()
 	void boxOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
@@ -74,5 +72,12 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category = "Weapon|Combo")
 	TArray<UAnimMontage*> combos;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon|Properties")
+	FVector boxTraceExtent = FVector(5.f, 5.f, 5.f);
+
+	UPROPERTY(EditAnywhere, Category = "Weapon|Properties")
+	bool boxTraceDebugEnabled;
 	
+	void boxTrace(FHitResult& result);
 };

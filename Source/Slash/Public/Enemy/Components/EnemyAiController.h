@@ -25,15 +25,19 @@ public:
 
 	EEnemyState currentState();
 	
-	virtual void Tick(float DeltaTime) override;
-
 	void death();
 	void moveToTarget(AActor* target);
-	AActor* updateCombatTarget();
-	void updatePatrolTarget();
 	void startChasing(AActor* target);
 	void startPatrolling();
 	void startAttacking();
+	bool isChasing();
+	bool isAttacking();
+	bool isPatrolling();
+	bool isEngaged();
+	bool isDead();
+	
+	bool withinCombatRadius();
+	bool withinAttackRadius();
 	
 	UFUNCTION()
 	void attack();
@@ -41,12 +45,19 @@ public:
 	UFUNCTION()
 	void attackEnd();
 	
+	virtual void Tick(float DeltaTime) override;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnPossess(APawn* InPawn) override;
 	bool inTargetRange(AActor* target, double radius);
 	
 private:
+	FBehavior* aiProperties;
+	AEnemy* enemy;
+	FTimerHandle patrolTimer;
+	FTimerHandle attackTimer;
+	
 	UPROPERTY(VisibleAnywhere, Category = "AIController")
 	UAIPerceptionComponent* aiPerceptionComponent;
 
@@ -62,23 +73,8 @@ private:
 	UFUNCTION()
 	void onPerceptionForgotten(AActor* Actor);
 	
-	AEnemy* enemy;
-
-	AActor* selectPatrolTarget();
-	
-	FTimerHandle patrolTimer;
 	void patrolTimerFinished();
-	
-	FTimerHandle attackTimer;
-	void attackTimerFinished();
-	
-	FBehavior* aiProperties;
-
-	bool withinCombatRadius();
-	bool withinAttackRadius();
-	bool isChasing();
-	bool isAttacking();
-	bool isPatrolling();
-	bool isEngaged();
-	bool isDead();
+	AActor* updateCombatTarget();
+	void updatePatrolTarget();
+	AActor* selectPatrolTarget();
 };

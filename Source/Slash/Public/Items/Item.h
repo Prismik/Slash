@@ -9,6 +9,7 @@
 
 class UNiagaraComponent;
 
+UENUM(BlueprintType)
 enum class EItemState : uint8 {
 	EIS_hovering,
 	EIS_equipped
@@ -50,7 +51,8 @@ protected:
 
 	virtual void sphereOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 	virtual void sphereOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|State")
 	EItemState state = EItemState::EIS_hovering;
 	
 private:
