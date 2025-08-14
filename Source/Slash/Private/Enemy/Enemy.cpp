@@ -46,6 +46,8 @@ AEnemy::AEnemy() {
 void AEnemy::handleDeath() {
 	Super::handleDeath();
 	
+	leftHandWeapon->SetActorEnableCollision(false);
+	rightHandWeapon->SetActorEnableCollision(false);
 	tracker->reset();
 	deathPose = orchestrator->playDeath();
 	SetLifeSpan(15.0);
@@ -63,16 +65,16 @@ void AEnemy::spawnStruckParticles(const FVector& p) {
 	}
 }
 
-void AEnemy::hit_Implementation(const FVector& p) {
+void AEnemy::hit_Implementation(const FVector& p, AActor* hitter) {
 	if (hitSound) {
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), hitSound, p);
 	}
 
 	spawnStruckParticles(p);
-
+	aiController->clearPatrolTimer();
 	if (attributes && attributes->alive()) {
 		if (aiProperties.state == EEnemyState::EES_engaged) return;
-		orchestrator->playStruck(p);
+		orchestrator->playStruck(p, hitter->GetActorLocation());
 	} else {
 		handleDeath();
 	}

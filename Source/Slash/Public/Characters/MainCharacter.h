@@ -52,7 +52,7 @@ public:
 	
 	AMainCharacter();
 
-	virtual void hit_Implementation(const FVector& p) override;
+	virtual void hit_Implementation(const FVector& p, AActor* hitter) override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
@@ -66,7 +66,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void disarm();
-	
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="MainCharacter|EnhancedInput")
 	UInputMappingContext* inputMapping;
@@ -125,4 +125,5 @@ private:
 	void equip(const FInputActionValue& Value);
 	
 	void computeTargetSpringArmLength(const float axis);
+	bool canAttack();
 };

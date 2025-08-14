@@ -22,8 +22,8 @@ void UAnimOrchestrator::playAttack(UAnimMontage* montage) {
 	playMontage(montage);
 }
 
-void UAnimOrchestrator::playStruck(const FVector& p) {
-	FName section = computeDirectionalStruckSection(p);
+void UAnimOrchestrator::playStruck(const FVector& p, const FVector& o) {
+	FName section = computeDirectionalStruckSection(p, o);
 	playMontage(struckMontage, &section);
 }
 
@@ -40,9 +40,9 @@ void UAnimOrchestrator::BeginPlay() {
 	animated = Cast<ACharacter>(GetOwner());
 }
 
-FName UAnimOrchestrator::computeDirectionalStruckSection(const FVector& p) {
+FName UAnimOrchestrator::computeDirectionalStruckSection(const FVector& p, const FVector& o) {
 	const FVector forward = animated->GetActorForwardVector();
-	const FVector d = ((p - animated->GetActorLocation()) * FVector(1.f, 1.f, 0.f)).GetSafeNormal();
+	const FVector d = ((o - animated->GetActorLocation()) * FVector(1.f, 1.f, 0.f)).GetSafeNormal();
 	const float cos = forward.Dot(d);
 	const float theta = FMath::RadiansToDegrees(FMath::Acos(cos));
 

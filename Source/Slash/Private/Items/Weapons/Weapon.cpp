@@ -63,7 +63,7 @@ void AWeapon::boxOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* 
 		if (hittable != nullptr) {
 			UE_LOG(LogTemp, Display, TEXT("MC was cast as hittable!!"));
 			UGameplayStatics::ApplyDamage(actor, baseDamage, GetInstigator()->GetController(), this, UDamageType::StaticClass());
-			IHittable::Execute_hit(actor, result.ImpactPoint);
+			IHittable::Execute_hit(actor, result.ImpactPoint, GetOwner());
 			ignoredActors.AddUnique(actor);
 		}
 		

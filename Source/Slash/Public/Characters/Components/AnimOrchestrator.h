@@ -18,8 +18,8 @@ public:
 
 	void playArming(FName section);
 	void playAttack(UAnimMontage* montage);
-	/// Play struck animation from a hit point
-	void playStruck(const FVector& p);
+	/// Play struck animation from a hit point and a hitter origin
+	void playStruck(const FVector& p, const FVector& o);
 	/// Play a random death animation and return the chosen pose
 	EDeathPose playDeath();
 	
@@ -35,7 +35,7 @@ protected:
 private:
 	ACharacter* animated;
 	
-	FName computeDirectionalStruckSection(const FVector& p);
+	FName computeDirectionalStruckSection(const FVector& p, const FVector& o);
 	void playMontage(UAnimMontage* montage, FName* section);
 	void playMontage(UAnimMontage* montage);
 	uint8 playMontage(UAnimMontage* montage, const TArray<FName>& sections);

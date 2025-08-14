@@ -60,15 +60,21 @@ AMainCharacter::AMainCharacter() {
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
 
-void AMainCharacter::hit_Implementation(const FVector& p) {
-	UE_LOG(LogTemp, Display, TEXT("MC was hit!"));
+void AMainCharacter::hit_Implementation(const FVector& p, AActor* hitter) {
+	if (hitSound) {
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), hitSound, p);
+	}
+	if (hitParticle) {
+		UGameplayStatics::SpawnEmitterAtLocation(this, hitParticle, p);
+	}
+
 	if (attributes && attributes->alive()) {
-		if (hitSound) {
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), hitSound, p);
+		if (equippedWeapon) {
+			equippedWeapon->setBoxCollision(false);
 		}
-		if (hitParticle) {
-			UGameplayStatics::SpawnEmitterAtLocation(this, hitParticle, p);
-		}
+		tracker->reset();
+		actionState = EActionState::EAS_hitReact;
+		orchestrator->playStruck(p, hitter->GetActorLocation());
 	} else {
 		
 	}
@@ -153,7 +159,6 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 float AMainCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
 	if (!attributes) return 0.f;
-	UE_LOG(LogTemp, Display, TEXT("MC took some damage!"));
 	return attributes->takeDamage(DamageAmount);
 }
 
@@ -200,9 +205,7 @@ void AMainCharacter::cycle(const FInputActionValue& Value) {
 }
 
 void AMainCharacter::attack(const FInputActionValue& Value) {
-	if (state == ECharacterState::ECS_unequipped) return;
-	if (actionState == EActionState::EAS_equipping) return;
-	if (!tracker->canProceed) return;
+	if (!canAttack()) return;
 	
 	actionState = EActionState::EAS_attacking;
 	orchestrator->playAttack(tracker->getMontage());
@@ -225,4 +228,9 @@ void AMainCharacter::equip(const FInputActionValue& Value) {
 void AMainCharacter::computeTargetSpringArmLength(const float axis) {
 	float unclampedDestination = (-50 * axis) + springArm->TargetArmLength;
 	targetArmLength = FMath::Clamp(unclampedDestination, minArmLength, maxArmLength);
+}
+
+bool AMainCharacter::canAttack() {
+	if (state == ECharacterState::ECS_unequipped || actionState == EActionState::EAS_equipping) return false;
+	return tracker->canProceed;
 }

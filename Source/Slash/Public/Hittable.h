@@ -17,5 +17,5 @@ class SLASH_API IHittable {
 
 public:
 	UFUNCTION(BlueprintNativeEvent)
-	void hit(const FVector& p);
+	void hit(const FVector& p, AActor* hitter);
 };

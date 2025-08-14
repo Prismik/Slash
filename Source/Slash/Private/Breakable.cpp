@@ -58,6 +58,6 @@ void ABreakable::Tick(float DeltaTime)
 
 }
 
-void ABreakable::hit_Implementation(const FVector& p) {
+void ABreakable::hit_Implementation(const FVector& p, AActor* hitter) {
 	// Handled in handleBreakEvent now
 }

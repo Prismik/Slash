@@ -20,7 +20,7 @@ class SLASH_API ABreakable : public AActor, public IHittable
 public:	
 	ABreakable();
 	virtual void Tick(float DeltaTime) override;
-	virtual void hit_Implementation(const FVector& p) override;
+	virtual void hit_Implementation(const FVector& p, AActor* hitter) override;
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)

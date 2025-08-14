@@ -81,7 +81,7 @@ void AEnemyAiController::startChasing(AActor* target) {
 	
 	if (isEngaged()) return;
 	aiProperties->state = EEnemyState::EES_chasing;
-	GetWorldTimerManager().ClearTimer(patrolTimer);
+	clearPatrolTimer();
 	enemy->GetCharacterMovement()->MaxWalkSpeed = aiProperties->chasingSpeed;
 	aiProperties->combatTarget = target;
 	moveToTarget(target);
@@ -113,6 +113,10 @@ bool AEnemyAiController::withinCombatRadius() {
 
 bool AEnemyAiController::withinAttackRadius() {
 	return inTargetRange(aiProperties->combatTarget, aiProperties->attackRadius);
+}
+
+void AEnemyAiController::clearPatrolTimer() {
+	GetWorldTimerManager().ClearTimer(patrolTimer);
 }
 
 void AEnemyAiController::attackEnd() {

@@ -38,6 +38,8 @@ public:
 	
 	bool withinCombatRadius();
 	bool withinAttackRadius();
+
+	void clearPatrolTimer();
 	
 	UFUNCTION()
 	void attack();

@@ -38,7 +38,7 @@ public:
 	
 	AEnemy();
 	
-	virtual void hit_Implementation(const FVector& p) override;
+	virtual void hit_Implementation(const FVector& p, AActor* hitter) override;
 	virtual void Tick(float DeltaTime) override;
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	virtual TArray<UAnimMontage*> getCombos() override;
