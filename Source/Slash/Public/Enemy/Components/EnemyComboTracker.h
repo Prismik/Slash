@@ -30,6 +30,9 @@ protected:
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Combat")
+	bool randomized = false;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
 	float minWaitTime = 0.5f;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
@@ -44,4 +47,7 @@ private:
 	// Single-cast delegate
 	FAttackHandler startAttack;
 	FAttackHandler endAttack;
+
+	void handleRandomAttack();
+	void handleProbabilisticProgressionAttack();
 };

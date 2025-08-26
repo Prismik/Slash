@@ -6,6 +6,7 @@
 #include "Enemy/Enemy.h"
 #include "Enemy/Components/EnemyComboTracker.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Damage.h"
@@ -71,7 +72,7 @@ void AEnemyAiController::moveToTarget(AActor* target) {
 	if (!target || isEngaged()) return;
 	FAIMoveRequest request;
 	request.SetGoalActor(target);
-	request.SetAcceptanceRadius(55.f);
+	request.SetAcceptanceRadius(aiProperties->moveToTargetAcceptance);
 	MoveTo(request);
 }
 
@@ -103,7 +104,7 @@ void AEnemyAiController::startPatrolling() {
 void AEnemyAiController::startAttacking() {
 	if (isAttacking() || isEngaged()) return;
 	aiProperties->state = EEnemyState::EES_attacking;
-	enemy->tracker->startTimer();
+	tracker->startTimer();
 	UE_LOG(LogTemp, Display, TEXT("started attacking %s"), *aiProperties->combatTarget->GetName());
 }
 
@@ -125,7 +126,9 @@ void AEnemyAiController::attackEnd() {
 }
 
 void AEnemyAiController::attack() {
+	if (!aiProperties->combatTarget) return;
 	aiProperties->state = EEnemyState::EES_engaged;
+	
 	enemy->handleAttack();
 }
 
@@ -133,7 +136,12 @@ void AEnemyAiController::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	if (isDead()) return;
-	if (isPatrolling()) {
+	if (aiProperties->combatTarget && aiProperties->combatTarget->ActorHasTag(ABaseCharacter::DEAD_CHARACTER_TAG)) {
+		aiProperties->combatTarget = nullptr;
+	}
+	if (isEngaged() && withinCombatRadius()) {
+		faceTarget(aiProperties->combatTarget, DeltaTime, 3.5f);
+	} else if (isPatrolling()) {
 		updatePatrolTarget();
 	} else {
 		updateCombatTarget();
@@ -150,14 +158,15 @@ void AEnemyAiController::BeginPlay() {
 
 	if (!enemy) {
 		enemy = Cast<AEnemy>(GetPawn());
+		tracker = Cast<UEnemyComboTracker>(enemy->tracker);
+		tracker->bindAttack(this, FName("attack"));
+		tracker->bindEndAttack(this, FName("attackEnd"));
 	}
 
 	if (!aiProperties) {
 		aiProperties = &enemy->aiProperties;
 	}
 
-	enemy->tracker->bindAttack(this, FName("attack"));
-	enemy->tracker->bindEndAttack(this, FName("attackEnd"));
 	moveToTarget(aiProperties->patrolTarget);
 }
 
@@ -166,6 +175,9 @@ void AEnemyAiController::OnPossess(APawn* InPawn) {
 	
 	if (!enemy) {
 		enemy = Cast<AEnemy>(InPawn);
+		tracker = Cast<UEnemyComboTracker>(enemy->tracker);
+		tracker->bindAttack(this, FName("attack"));
+		tracker->bindEndAttack(this, FName("attackEnd"));
 	}
 
 	if (!aiProperties) {
@@ -175,6 +187,7 @@ void AEnemyAiController::OnPossess(APawn* InPawn) {
 
 bool AEnemyAiController::inTargetRange(AActor* target, double radius) {
 	if (!target || !enemy) return false;
+	if (target->ActorHasTag(ABaseCharacter::DEAD_CHARACTER_TAG)) return false;
 	const double distanceFromTarget = (target->GetActorLocation() - enemy->GetActorLocation()).Length();
 	return distanceFromTarget <= radius;
 }
@@ -183,7 +196,7 @@ void AEnemyAiController::onPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus
 	if (isDead() || isChasing() || isEngaged()) return;
 	if (Stimulus.Type == UAISense::GetSenseID<UAISense_Sight>()) {
 		if (Stimulus.IsActive()) {
-			if (!isAttacking() && Actor->ActorHasTag(AMainCharacter::MAIN_CHARACTER_TAG)) {
+			if (shouldChaseTarget(Actor)) {
 				startChasing(Actor);
 			}
 		} else if (Stimulus.IsExpired()) {
@@ -237,4 +250,27 @@ AActor* AEnemyAiController::selectPatrolTarget() {
 	}
 	
 	return nullptr;
+}
+
+bool AEnemyAiController::shouldChaseTarget(AActor* target) {
+	return !isAttacking() && target->ActorHasTag(AMainCharacter::MAIN_CHARACTER_TAG) && !target->ActorHasTag(ABaseCharacter::DEAD_CHARACTER_TAG);
+}
+
+void AEnemyAiController::faceTarget(AActor* target, float dt, float speed) {
+	const FRotator lookat = UKismetMathLibrary::FindLookAtRotation(enemy->GetActorLocation(), target->GetActorLocation());
+	const FRotator interp = FMath::RInterpTo(enemy->GetActorRotation(), lookat, dt, speed);
+	enemy->SetActorRotation(interp);
+}
+
+FVector AEnemyAiController::getTranslateWarpTarget() {
+	if (!aiProperties->combatTarget) return FVector::ZeroVector;
+	const FVector p = aiProperties->combatTarget->GetActorLocation();
+	const FVector o = enemy->GetActorLocation();
+	const FVector d = (o - p).GetSafeNormal() * aiProperties->warpTargetDistance;
+	return p + d;
+}
+
+FVector AEnemyAiController::getRotateWarpTarget() {
+	if (!aiProperties->combatTarget) return FVector::ZeroVector;
+	return aiProperties->combatTarget->GetActorLocation();
 }

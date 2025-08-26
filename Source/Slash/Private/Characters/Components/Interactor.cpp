@@ -2,8 +2,7 @@
 
 
 #include "Characters/Components/Interactor.h"
-
-#include "DebugUtilities.h"
+#include "HUD/ItemTooltip.h"
 #include "Interactable.h"
 
 UInteractor::UInteractor() {
@@ -28,6 +27,10 @@ void UInteractor::add(AInteractable* interactable) {
 		interactable->focus();
 	}
 
+	if (interactable->ActorHasTag(FName("weapon"))) {
+		tooltip->show();
+	}
+	
 	interactables.AddUnique(interactable);
 }
 
@@ -37,7 +40,7 @@ void UInteractor::remove(AInteractable* interactable) {
 	
 	interactable->unfocus();
 	interactables.Remove(interactable);
-
+	tooltip->hide();
 	if (elementIndex == index) {
 		index = FMath::Max(0, index - 1);
 	} else if (elementIndex < index) {
@@ -60,6 +63,10 @@ void UInteractor::cycle() {
 
 void UInteractor::interact() {
 	if (interactables.IsEmpty()) { return; }
+
+	if (interactables[index]->ActorHasTag(FName("weapon"))) {
+		tooltip->hide();
+	}
 	
 	interactables[index]->interact(character);
 }

@@ -4,6 +4,7 @@
 #include "Items/Treasure.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Characters/MainCharacter.h"
+#include "Kismet/GameplayStatics.h"
 
 
 int32 ATreasure::getValue() {
@@ -13,6 +14,9 @@ int32 ATreasure::getValue() {
 void ATreasure::interact_Implementation(AMainCharacter* character) {
 	Super::interact_Implementation(character);
 
+	if (pickupSound) {
+		UGameplayStatics::PlaySoundAtLocation(this, pickupSound, GetActorLocation());
+	}
 	character->collect(this);
 	this->Destroy();
 }

@@ -35,10 +35,16 @@ struct FBehavior {
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float chasingSpeed = 300.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	float warpTargetDistance = 33.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+	float moveToTargetAcceptance = 55.f;
 	
 	UPROPERTY(VisibleInstanceOnly, BlueprintreadWrite, Category = "Movement")
 	EEnemyState state = EEnemyState::EES_patrolling;
 	
 	FBehavior()
-	   : combatRadius(1000.f), attackRadius(150.f), patrolRadius(200.f), combatTarget(nullptr), patrolTarget(nullptr), minWaitTime(3.f), maxWaitTime(9.f) {}
+	   : combatRadius(1000.f), attackRadius(150.f), patrolRadius(200.f), combatTarget(nullptr), patrolTarget(nullptr), minWaitTime(2.f), maxWaitTime(6.f) {}
 };

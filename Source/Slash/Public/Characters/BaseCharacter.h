@@ -8,6 +8,7 @@
 
 class UAnimOrchestrator;
 class UAttributes;
+class UComboTracker;
 class UParticleSystem;
 class USoundBase;
 
@@ -18,10 +19,18 @@ class SLASH_API ABaseCharacter : public ACharacter {
 public:
 	// Sets default values for this character's properties
 	ABaseCharacter();
-
+	bool isAlive();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="BaseCharacter|Combat")
+	UComboTracker* tracker;
+	
 	static const FName LEFT_HAND_SOCKET;
 	static const FName RIGHT_HAND_SOCKET;
+	static const FName DEAD_CHARACTER_TAG;
 	
+	virtual void Tick(float DeltaTime) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -40,12 +49,10 @@ protected:
 	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "BaseCharacter")
 	UAnimOrchestrator* orchestrator;
-	
-	virtual void handleDeath();
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual void handleDeath();
+	
+	UFUNCTION(BlueprintImplementableEvent, meta = (AllowPrivateAccess = "true"), Category = "Custom")
+	void onDeath();
 };

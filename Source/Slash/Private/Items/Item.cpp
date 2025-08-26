@@ -8,8 +8,8 @@
 AItem::AItem() {
  	PrimaryActorTick.bCanEverTick = true;
 
-	emberEffect = CreateDefaultSubobject<UNiagaraComponent>(FName("embers"));
-	emberEffect->SetupAttachment(GetRootComponent());
+	effect = CreateDefaultSubobject<UNiagaraComponent>(FName("SpecialEffect"));
+	effect->SetupAttachment(GetRootComponent());
 }
 
 void AItem::BeginPlay() {

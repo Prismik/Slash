@@ -61,8 +61,7 @@ void AWeapon::boxOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* 
 		if (GetOwner()->ActorHasTag(AEnemy::ENEMY_TAG) && actor->ActorHasTag(AEnemy::ENEMY_TAG)) return;
 		IHittable* hittable = Cast<IHittable>(actor);
 		if (hittable != nullptr) {
-			UE_LOG(LogTemp, Display, TEXT("MC was cast as hittable!!"));
-			UGameplayStatics::ApplyDamage(actor, baseDamage, GetInstigator()->GetController(), this, UDamageType::StaticClass());
+			UGameplayStatics::ApplyDamage(actor, baseDamage * currentMultiplier, GetInstigator()->GetController(), this, UDamageType::StaticClass());
 			IHittable::Execute_hit(actor, result.ImpactPoint, GetOwner());
 			ignoredActors.AddUnique(actor);
 		}
@@ -119,11 +118,13 @@ void AWeapon::BeginPlay() {
 	if (trailParticle) {
 		trailParticleEmitter->SetTemplate(trailParticle);
 	}
+
+	Tags.Add(FName("weapon"));
 }
 
 void AWeapon::equip(AMainCharacter* character) {
-	if (equipSound) {
-		UGameplayStatics::PlaySoundAtLocation(this, equipSound, GetActorLocation());
+	if (pickupSound) {
+		UGameplayStatics::PlaySoundAtLocation(this, pickupSound, GetActorLocation());
 	}
 	
 	attach(character, ABaseCharacter::RIGHT_HAND_SOCKET);
@@ -165,4 +166,16 @@ void AWeapon::attach(ABaseCharacter* toTarget, FName socket) {
 
 TArray<UAnimMontage*> AWeapon::getCombos() {
 	return combos;
+}
+
+TArray<float> AWeapon::getDamageMultipliers() {
+	return comboDamageMultipliers;
+}
+
+float AWeapon::getBaseDamage() {
+	return baseDamage;
+}
+
+void AWeapon::setMultiplierIndex(float index) {
+	currentMultiplier = comboDamageMultipliers[index];
 }

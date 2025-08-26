@@ -36,6 +36,18 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	bool accelerating = false;
 
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+	FVector2D directionalSpeed;
+	
+	UPROPERTY(BlueprintReadOnly, Category = ActionState)
+	bool dead = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = ActionState)
+	bool focused = false;
+	
 	UPROPERTY(BlueprintReadOnly, Category = State)
 	ECharacterState characterState;
+
+	UPROPERTY(BlueprintReadOnly, Category = ActionState)
+	EActionState actionState;
 };

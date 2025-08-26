@@ -9,11 +9,28 @@ enum class ECharacterState: uint8 {
 };
 
 UENUM(BlueprintType)
+enum class EFocusMode: uint8 {
+	EFM_unfocused UMETA(DisplayName = "Unfocused"),
+	EFM_focusedOnEnemy UMETA(DisplayName = "Focused on an enemy"),
+};
+
+UENUM(BlueprintType)
 enum class EActionState: uint8 {
 	EAS_unoccupied UMETA(DisplayName = "Unoccupied"),
 	EAS_hitReact UMETA(DisplayName = "Hit reaction"),
 	EAS_equipping UMETA(DisplayName = "Equipping"),
 	EAS_attacking UMETA(DisplayName = "Attacking"),
+	EAS_dodging UMETA(DisplayName = "Dodging"),
+	EAS_dead UMETA(DisplayName = "Dead"),
+};
+
+UENUM(BlueprintType)
+enum class EInputDirection : uint8 {
+	EID_forward,
+	EID_left,
+	EID_right,
+	EID_backward,
+	EID_none
 };
 
 UENUM(BlueprintType)
@@ -26,10 +43,10 @@ enum class EDeathPose: uint8 {
 
 UENUM(BlueprintType)
 enum class EEnemyState: uint8 {
+	EES_stateless UMETA(DisplayName = "Stateless"),
 	EES_dead UMETA(DisplayName = "Dead"),
 	EES_patrolling UMETA(DisplayName = "Patrolling"),
 	EES_chasing UMETA(DisplayName = "Chasing"),
 	EES_attacking UMETA(DisplayName = "Attacking"),
 	EES_engaged UMETA(DisplayName = "Engaged"),
-	EES_stateless UMETA(DisplayName = "Stateless")
 };

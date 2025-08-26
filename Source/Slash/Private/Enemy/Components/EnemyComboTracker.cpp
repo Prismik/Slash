@@ -20,8 +20,24 @@ void UEnemyComboTracker::attackTimerFinished() {
 		startTimer();
 		return;
 	}
+
+	if (randomized) {
+		handleRandomAttack();
+	}
 	
 	startAttack.ExecuteIfBound();
+	
+	if (!randomized) {
+		handleProbabilisticProgressionAttack();
+	}
+}
+
+void UEnemyComboTracker::handleRandomAttack() {
+	const uint32 rng = FMath::RandRange(0, comboGenerator->getCombos().Num() - 1);
+	comboIndex = rng;
+}
+
+void UEnemyComboTracker::handleProbabilisticProgressionAttack() {
 	const float rng = FMath::RandRange(0, 1);
 	if (rng <= continuationProbability) {
 		startTimer();

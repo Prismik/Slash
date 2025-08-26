@@ -20,4 +20,7 @@ class SLASH_API IComboGenerator {
 
 public:
 	virtual TArray<UAnimMontage*> getCombos() = 0;
+	virtual TArray<float> getDamageMultipliers() = 0;
+	virtual float getBaseDamage() = 0;
+	virtual void setMultiplierIndex(float index) = 0;
 };

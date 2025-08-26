@@ -29,11 +29,12 @@ public:
 	virtual void reset();
 
 	UAnimMontage* getMontage();
-
+	uint8 getIndex();
+	
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = Combo)
 	bool canProceed = true;
-	
-private:
+
+protected:
 	IComboGenerator* comboGenerator;
 	uint8 comboIndex = 0;
 };

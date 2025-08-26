@@ -9,6 +9,7 @@
 
 class AActor;
 class AEnemy;
+class UEnemyComboTracker;
 struct FAIStimulus;
 struct FBehavior;
 class UAIPerceptionComponent;
@@ -79,4 +80,16 @@ private:
 	AActor* updateCombatTarget();
 	void updatePatrolTarget();
 	AActor* selectPatrolTarget();
+
+	bool shouldChaseTarget(AActor* target);
+	void faceTarget(AActor* target, float dt, float speed);
+	
+	UFUNCTION(BlueprintCallable)
+	FVector getTranslateWarpTarget();
+
+	UFUNCTION(BlueprintCallable)
+	FVector getRotateWarpTarget();
+
+	UPROPERTY()
+	UEnemyComboTracker* tracker;
 };

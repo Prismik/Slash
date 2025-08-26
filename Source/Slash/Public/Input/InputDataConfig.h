@@ -43,4 +43,10 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UInputAction* equip;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UInputAction* focus;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UInputAction* dodge;
 };

@@ -24,15 +24,23 @@ void AInteractable::unfocus() {
 }
 
 void AInteractable::sphereOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+	if (!OtherActor->ActorHasTag(AMainCharacter::MAIN_CHARACTER_TAG)) return;
+	
 	AMainCharacter* character = Cast<AMainCharacter>(OtherActor);
 	if (!character) return;
 
-	character->addOverlap(this);
+	if (canInteract) {
+		character->addOverlap(this);
+	} else if (autoInteract) {
+		interact(character);
+	}
 }
 
 void AInteractable::sphereOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
+	if (!OtherActor->ActorHasTag(AMainCharacter::MAIN_CHARACTER_TAG)) return;
+	
 	AMainCharacter* character = Cast<AMainCharacter>(OtherActor);
-	if (!character) return;
+	if (!character || !canInteract) return;
 
 	character->removeOverlap(this);
 }

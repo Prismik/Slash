@@ -6,11 +6,11 @@
 #include "ComboGenerator.h"
 #include "Hittable.h"
 #include "Characters/BaseCharacter.h"
-#include "GameFramework/Character.h"
 #include "Characters/CharacterTypes.h"
 #include "Enemy/FBehavior.h"
 #include "Enemy.generated.h"
 
+class UFocusIndicatorComponent;
 class AAIController;
 class ABaseCharacter;
 class AController;
@@ -30,18 +30,24 @@ class SLASH_API AEnemy : public ABaseCharacter, public IHittable, public IComboG
 	GENERATED_BODY()
 
 public:
+	AEnemy();
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy|Properties")
 	FBehavior aiProperties;
 	
-	UPROPERTY(BlueprintReadOnly, Category="Enemy|Combat")
-	UEnemyComboTracker* tracker;
-	
-	AEnemy();
+	UFUNCTION(BlueprintNativeEvent, Category = "Events")
+	void OnFocus();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Events")
+	void OnFocusEnd();
 	
 	virtual void hit_Implementation(const FVector& p, AActor* hitter) override;
 	virtual void Tick(float DeltaTime) override;
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	virtual TArray<UAnimMontage*> getCombos() override;
+	virtual TArray<float> getDamageMultipliers() override;
+	virtual float getBaseDamage() override;
+	virtual void setMultiplierIndex(float index) override;
 
 	void handleAttack();
 
@@ -57,18 +63,27 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Enemy")
 	UHealthBarComponent* healthBar;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"), Category = "Enemy")
+	UFocusIndicatorComponent* focusIndicator;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	AEnemyAiController* aiController;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category = "Enemy|Combat")
 	TArray<UAnimMontage*> combos;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category = "Enemy|Combat")
+	TArray<float> comboDamageMultipliers;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category="Enemy|Weapon")
 	AWeapon* leftHandWeapon;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category="Enemy|Weapon")
 	AWeapon* rightHandWeapon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category="Enemy")
+	float souls = 5;
 	
 	void spawnStruckParticles(const FVector& p);
 };

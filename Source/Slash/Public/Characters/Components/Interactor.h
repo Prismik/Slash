@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "Interactor.generated.h"
 
-
+class UItemTooltip;
 class AInteractable;
 class AMainCharacter;
 
@@ -25,7 +25,8 @@ public:
 	void cycle();
 	void interact();
 	AMainCharacter* character;
-
+	UItemTooltip* tooltip;
+	
 protected:
 	virtual void BeginPlay() override;
 

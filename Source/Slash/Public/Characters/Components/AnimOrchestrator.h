@@ -22,12 +22,18 @@ public:
 	void playStruck(const FVector& p, const FVector& o);
 	/// Play a random death animation and return the chosen pose
 	EDeathPose playDeath();
+	void playDodge(EInputDirection direction);
 	
 	// Consts
 	static const FName STRUCT_FRONT_SECTION;
 	static const FName STRUCK_LEFT_SECTION;
 	static const FName STRUCK_RIGHT_SECTION;
 	static const FName STRUCK_BACK_SECTION;
+	
+	static const FName DODGE_FORWARD_SECTION;
+	static const FName DODGE_BACKWARD_SECTION;
+	static const FName DODGE_LEFT_SECTION;
+	static const FName DODGE_RIGHT_SECTION;
 
 protected:
 	virtual void BeginPlay() override;
@@ -46,7 +52,10 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Anim montages")
 	UAnimMontage* struckMontage;
-
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Anim montages")
+	UAnimMontage* dodgeMontage;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Anim montages|Death")
 	UAnimMontage* deathMontage;
 

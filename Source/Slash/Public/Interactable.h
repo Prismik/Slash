@@ -39,6 +39,8 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category="Item")
 	UStaticMeshComponent* mesh;
-	
+
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category="Item")
 	bool canInteract = true;
+	bool autoInteract = false;
 };

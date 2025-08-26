@@ -19,10 +19,15 @@ void UMainCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds) {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
 	if (movementComponent) {
-		groundSpeed = UKismetMathLibrary::VSizeXY(movementComponent->Velocity);
+		float vel = UKismetMathLibrary::VSizeXY(movementComponent->Velocity);
+		directionalSpeed = mainCharacter->directionalSpeed * vel;
+		groundSpeed = vel;
 		sprintToggled = mainCharacter->sprintToggled;
 		isFalling = movementComponent->IsFalling();
 		accelerating = movementComponent->GetCurrentAcceleration().Length() > 0.f;
 		characterState = mainCharacter->state;
+		actionState = mainCharacter->actionState;
+		dead = mainCharacter->actionState == EActionState::EAS_dead;
+		focused = mainCharacter->isFocused();
 	}
 }

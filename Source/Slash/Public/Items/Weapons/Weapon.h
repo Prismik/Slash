@@ -22,12 +22,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon|Type")
 	bool twoHanded = false;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon|Audio")
-	USoundBase* equipSound;
-	
 	virtual void Tick(float DeltaTime) override;
 	virtual void interact_Implementation(AMainCharacter* character) override;
 	virtual TArray<UAnimMontage*> getCombos() override;
+	virtual TArray<float> getDamageMultipliers() override;
+	virtual float getBaseDamage() override;
+	virtual void setMultiplierIndex(float index) override;
 	
 	void equip(AMainCharacter* character);
 	void unequip(AMainCharacter* character);
@@ -59,6 +59,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* boxTraceDestination;
 
+	UPROPERTY()
 	TArray<AActor*> ignoredActors;
 
 	UPROPERTY(EditAnywhere, Category = "Weapon|VFX")
@@ -73,11 +74,16 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category = "Weapon|Combo")
 	TArray<UAnimMontage*> combos;
 
-	UPROPERTY(EditAnywhere, Category = "Weapon|Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category = "Weapon|Combo")
+	TArray<float> comboDamageMultipliers;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category = "Weapon|Properties")
 	FVector boxTraceExtent = FVector(5.f, 5.f, 5.f);
 
-	UPROPERTY(EditAnywhere, Category = "Weapon|Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category = "Weapon|Properties")
 	bool boxTraceDebugEnabled;
 	
 	void boxTrace(FHitResult& result);
+
+	float currentMultiplier = 1.f;
 };

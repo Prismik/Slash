@@ -33,6 +33,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Item|Sin parameters")
 	float rotationSpeed = 20.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Audio")
+	USoundBase* pickupSound;
 	
 	virtual void BeginPlay() override;
 
@@ -43,8 +46,7 @@ protected:
 	float computeCosTransformation();
 
 	UPROPERTY(EditAnywhere, Category = "Item|FX")
-	
-	UNiagaraComponent* emberEffect;
+	UNiagaraComponent* effect;
 	
 	template<typename T>
 	T avg(T lhs, T rhs);

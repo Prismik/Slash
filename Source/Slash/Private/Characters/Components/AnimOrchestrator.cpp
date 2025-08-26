@@ -9,6 +9,11 @@ const FName UAnimOrchestrator::STRUCK_LEFT_SECTION(FName("hitReact_left"));
 const FName UAnimOrchestrator::STRUCK_RIGHT_SECTION(FName("hitReact_right"));
 const FName UAnimOrchestrator::STRUCK_BACK_SECTION(FName("hitReact_back"));
 
+const FName UAnimOrchestrator::DODGE_FORWARD_SECTION(FName("dodge_front"));
+const FName UAnimOrchestrator::DODGE_BACKWARD_SECTION(FName("dodge_back"));
+const FName UAnimOrchestrator::DODGE_LEFT_SECTION(FName("dodge_left"));
+const FName UAnimOrchestrator::DODGE_RIGHT_SECTION(FName("dodge_right"));
+
 UAnimOrchestrator::UAnimOrchestrator() {
 	PrimaryComponentTick.bCanEverTick = false;
 
@@ -32,6 +37,26 @@ EDeathPose UAnimOrchestrator::playDeath() {
 	return rng >= static_cast<uint8>(EDeathPose::EDP_max)
 		? EDeathPose::EDP_max
 		: static_cast<EDeathPose>(rng);
+}
+
+void UAnimOrchestrator::playDodge(EInputDirection direction) {
+	FName section;
+	switch (direction) {
+	case EInputDirection::EID_forward:
+		section = DODGE_FORWARD_SECTION;
+		break;
+	case EInputDirection::EID_left:
+		section = DODGE_LEFT_SECTION;
+		break;
+	case EInputDirection::EID_right:
+		section = DODGE_RIGHT_SECTION;
+		break;
+	case EInputDirection::EID_backward: case EInputDirection::EID_none:
+		section = DODGE_BACKWARD_SECTION;
+		break;
+	}
+	
+	playMontage(dodgeMontage, &section);
 }
 
 void UAnimOrchestrator::BeginPlay() {
@@ -65,7 +90,7 @@ void UAnimOrchestrator::playMontage(UAnimMontage* montage, FName* section) {
 	animInst->Montage_Play(montage);
 	
 	if (!section) return;
-	animInst->Montage_JumpToSection(*section, deathMontage);
+	animInst->Montage_JumpToSection(*section, montage);
 }
 
 void UAnimOrchestrator::playMontage(UAnimMontage* montage) {

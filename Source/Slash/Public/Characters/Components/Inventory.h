@@ -16,7 +16,7 @@ public:
 	UInventory();
 
 	UPROPERTY(VisibleAnywhere)
-	float currency = 0;
+	uint32 currency = 0;
 	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	

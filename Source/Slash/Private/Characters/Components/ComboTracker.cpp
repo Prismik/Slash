@@ -41,3 +41,6 @@ UAnimMontage* UComboTracker::getMontage() {
 	return comboGenerator->getCombos()[comboIndex];
 }
 
+uint8 UComboTracker::getIndex() {
+	return comboIndex;
+}

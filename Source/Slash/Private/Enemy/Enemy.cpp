@@ -12,6 +12,7 @@
 #include "Enemy/Components/EnemyAiController.h"
 #include "Enemy/Components/EnemyComboTracker.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "HUD/FocusIndicatorComponent.h"
 #include "HUD/HealthBarComponent.h"
 #include "Items/Weapons/Weapon.h"
 #include "Kismet/GameplayStatics.h"
@@ -32,6 +33,9 @@ AEnemy::AEnemy() {
 	
 	healthBar = CreateDefaultSubobject<UHealthBarComponent>(FName("HealthBar"));
 	healthBar->SetupAttachment(GetRootComponent());
+
+	focusIndicator = CreateDefaultSubobject<UFocusIndicatorComponent>(FName("FocusIndicator"));
+	focusIndicator->SetupAttachment(GetRootComponent());
 	
 	orchestrator = CreateDefaultSubobject<UAnimOrchestrator>(TEXT("AnimOrchestrator"));
 	
@@ -41,6 +45,14 @@ AEnemy::AEnemy() {
 	AIControllerClass = AEnemyAiController::StaticClass();
 
 	aiProperties = FBehavior();
+}
+
+void AEnemy::OnFocus_Implementation() {
+	focusIndicator->show();
+}
+
+void AEnemy::OnFocusEnd_Implementation() {
+	focusIndicator->hide();
 }
 
 void AEnemy::handleDeath() {
@@ -55,6 +67,7 @@ void AEnemy::handleDeath() {
 	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	healthBar->SetVisibility(false);
+	focusIndicator->SetVisibility(false);
 	aiController->death();
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 }
@@ -87,6 +100,10 @@ void AEnemy::BeginPlay() {
 	if (healthBar) {
 		healthBar->setHealthPercent(attributes->healthPercent());
 	}
+
+	if (focusIndicator) {
+		focusIndicator->hide();
+	}
 	
 	tracker->assign(this);
 	Tags.Add(ENEMY_TAG);
@@ -116,6 +133,18 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 
 TArray<UAnimMontage*> AEnemy::getCombos() {
 	return combos;
+}
+
+TArray<float> AEnemy::getDamageMultipliers() {
+	return comboDamageMultipliers;
+}
+
+float AEnemy::getBaseDamage() {
+	return 15;
+}
+
+void AEnemy::setMultiplierIndex(float index) {
+	// no op for now
 }
 
 void AEnemy::handleAttack() {
