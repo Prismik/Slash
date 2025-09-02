@@ -37,7 +37,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void setBoxCollision(bool enabled);
-	
+
+	UFUNCTION(BlueprintCallable)
+	void setBoxExtent(const FVector& halfSize, const FVector& traceSize);
+
 	static const FName TRAIL_START_SOCKET;
 	static const FName TRAIL_END_SOCKET;
 	
@@ -53,10 +56,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Weapon|Properties")
 	UBoxComponent* box;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category = "Weapon|Properties")
 	USceneComponent* boxTraceOrigin;
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category = "Weapon|Properties")
 	USceneComponent* boxTraceDestination;
 
 	UPROPERTY()
@@ -82,8 +85,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"), Category = "Weapon|Properties")
 	bool boxTraceDebugEnabled;
-	
-	void boxTrace(FHitResult& result);
+
+	void dualBoxTrace(FHitResult& result);
+	void boxTrace(const FVector& o, const FVector& d, FHitResult& result);
 
 	float currentMultiplier = 1.f;
 };

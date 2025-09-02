@@ -3,7 +3,7 @@
 
 #include "Characters/Components/Interactor.h"
 #include "HUD/ItemTooltip.h"
-#include "Interactable.h"
+#include "Interactables/Interactable.h"
 
 UInteractor::UInteractor() {
 	PrimaryComponentTick.bCanEverTick = true;

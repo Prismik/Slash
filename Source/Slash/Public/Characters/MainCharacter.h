@@ -171,8 +171,10 @@ private:
 	
 	UPROPERTY()
 	TArray<AEnemy*> focusableEnemies;
-	
+
+	UPROPERTY(VisibleInstanceOnly, Category="MainCharacter|Movement")
 	FVector focusVector = FVector::ZeroVector;
+	
 	EFocusMode focusMode = EFocusMode::EFM_unfocused;
 	void focus(AEnemy* target);
 	

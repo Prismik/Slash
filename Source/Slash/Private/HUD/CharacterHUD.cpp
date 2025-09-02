@@ -22,12 +22,14 @@ void ACharacterHUD::PreInitializeComponents() {
 		APlayerController* ctrl = world->GetFirstPlayerController();
 		if (ctrl && overlayClass) {
 			mainOverlay = CreateWidget<UCharacterOverlay>(ctrl, overlayClass);
+			mainOverlay->SetVisibility(ESlateVisibility::Hidden);
 			mainOverlay->AddToViewport();
 		}
 
 		if (ctrl && tooltipClass) {
 			tooltip = CreateWidget<UItemTooltip>(ctrl, tooltipClass);
 			tooltip->AddToViewport();
+			tooltip->hide();
 		}
 	}
 }

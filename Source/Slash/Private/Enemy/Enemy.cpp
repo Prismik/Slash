@@ -43,7 +43,7 @@ AEnemy::AEnemy() {
 	bUseControllerRotationPitch = bUseControllerRotationRoll = bUseControllerRotationYaw = false;
 
 	AIControllerClass = AEnemyAiController::StaticClass();
-
+	
 	aiProperties = FBehavior();
 }
 
@@ -57,9 +57,14 @@ void AEnemy::OnFocusEnd_Implementation() {
 
 void AEnemy::handleDeath() {
 	Super::handleDeath();
-	
-	leftHandWeapon->SetActorEnableCollision(false);
-	rightHandWeapon->SetActorEnableCollision(false);
+
+	if (leftHandWeapon) {
+		leftHandWeapon->SetActorEnableCollision(false);
+	}
+
+	if (rightHandWeapon) {
+		rightHandWeapon->SetActorEnableCollision(false);
+	}
 	tracker->reset();
 	deathPose = orchestrator->playDeath();
 	SetLifeSpan(15.0);
@@ -76,6 +81,10 @@ void AEnemy::spawnStruckParticles(const FVector& p) {
 	if (hitParticle) {
 		UGameplayStatics::SpawnEmitterAtLocation(this, hitParticle, p);
 	}
+}
+
+FVector AEnemy::focusOffset() {
+	return focusIndicator->GetRelativeLocation();
 }
 
 void AEnemy::hit_Implementation(const FVector& p, AActor* hitter) {
@@ -96,6 +105,8 @@ void AEnemy::hit_Implementation(const FVector& p, AActor* hitter) {
 void AEnemy::BeginPlay() {
 	Super::BeginPlay();
 
+	SpawnDefaultController();
+	
 	aiController = Cast<AEnemyAiController>(GetController());
 	if (healthBar) {
 		healthBar->setHealthPercent(attributes->healthPercent());
@@ -107,6 +118,7 @@ void AEnemy::BeginPlay() {
 	
 	tracker->assign(this);
 	Tags.Add(ENEMY_TAG);
+
 }
 
 void AEnemy::Tick(float DeltaTime) {

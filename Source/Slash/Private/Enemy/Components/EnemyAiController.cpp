@@ -151,27 +151,16 @@ void AEnemyAiController::Tick(float DeltaTime) {
 void AEnemyAiController::BeginPlay() {
 	Super::BeginPlay();
 
-	if (aiPerceptionComponent) {
-		aiPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AEnemyAiController::onPerceptionUpdated);
-		aiPerceptionComponent->OnTargetPerceptionForgotten.AddDynamic(this, &AEnemyAiController::onPerceptionForgotten);
-	}
 
-	if (!enemy) {
-		enemy = Cast<AEnemy>(GetPawn());
-		tracker = Cast<UEnemyComboTracker>(enemy->tracker);
-		tracker->bindAttack(this, FName("attack"));
-		tracker->bindEndAttack(this, FName("attackEnd"));
-	}
-
-	if (!aiProperties) {
-		aiProperties = &enemy->aiProperties;
-	}
-
-	moveToTarget(aiProperties->patrolTarget);
 }
 
 void AEnemyAiController::OnPossess(APawn* InPawn) {
 	Super::OnPossess(InPawn);
+
+	if (aiPerceptionComponent) {
+		aiPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AEnemyAiController::onPerceptionUpdated);
+		aiPerceptionComponent->OnTargetPerceptionForgotten.AddDynamic(this, &AEnemyAiController::onPerceptionForgotten);
+	}
 	
 	if (!enemy) {
 		enemy = Cast<AEnemy>(InPawn);
@@ -182,6 +171,10 @@ void AEnemyAiController::OnPossess(APawn* InPawn) {
 
 	if (!aiProperties) {
 		aiProperties = &enemy->aiProperties;
+	}
+
+	if (enemy) {
+		moveToTarget(aiProperties->patrolTarget);
 	}
 }
 
@@ -246,7 +239,7 @@ AActor* AEnemyAiController::selectPatrolTarget() {
 	TArray<AActor*> validTargets = aiProperties->patrolTargets.FilterByPredicate([this](const AActor* actor){ return actor != aiProperties->patrolTarget; });
 	if (!validTargets.IsEmpty()) {
 		int32 rng = FMath::RandRange(0, validTargets.Num() - 1);
-		return aiProperties->patrolTargets[rng];
+		return validTargets[rng];
 	}
 	
 	return nullptr;

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Interactable.h"
+#include "Interactables/Interactable.h"
 #include "Characters/MainCharacter.h"
 #include "Components/SphereComponent.h"
 

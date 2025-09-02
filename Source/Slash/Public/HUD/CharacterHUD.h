@@ -14,12 +14,13 @@ class SLASH_API ACharacterHUD : public AHUD {
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable)
 	UCharacterOverlay* getOverlay();
 	UItemTooltip* getTooltip();
 	
 protected:
 	virtual void PreInitializeComponents() override;
-
+	
 private:
 	UPROPERTY()
 	UCharacterOverlay* mainOverlay;

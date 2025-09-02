@@ -49,4 +49,7 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UInputAction* dodge;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+    UInputAction* pause;
 };

@@ -32,17 +32,24 @@ AWeapon::AWeapon() {
 	trailParticleEmitter->bAutoActivate = false;
 }
 
-void AWeapon::boxTrace(FHitResult& result) {
+void AWeapon::dualBoxTrace(FHitResult& result) {
 	const FVector from = boxTraceOrigin->GetComponentLocation();
 	const FVector to = boxTraceDestination->GetComponentLocation();
-	
+	boxTrace(to, from,result);
+
+	if (!result.GetActor()) {
+		boxTrace(from, to, result);
+	}
+}
+
+void AWeapon::boxTrace(const FVector& o, const FVector& d, FHitResult& result) {
 	UKismetSystemLibrary::BoxTraceSingle(
 		this,
-		from,
-		to,
+		o,
+		d,
 		boxTraceExtent,
 		boxTraceOrigin->GetComponentRotation(),
-		ETraceTypeQuery::TraceTypeQuery1,
+		TraceTypeQuery1,
 		false,
 		ignoredActors,
 		boxTraceDebugEnabled ? EDrawDebugTrace::Type::ForDuration : EDrawDebugTrace::Type::None,
@@ -54,7 +61,9 @@ void AWeapon::boxTrace(FHitResult& result) {
 void AWeapon::boxOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	if (GetOwner()->ActorHasTag(AEnemy::ENEMY_TAG) && OtherActor->ActorHasTag(AEnemy::ENEMY_TAG)) return;
 	FHitResult result;
-	boxTrace(result);
+	const FVector from = boxTraceOrigin->GetComponentLocation();
+	const FVector to = boxTraceDestination->GetComponentLocation();
+	dualBoxTrace(result);
 
 	AActor* actor = result.GetActor();
 	if (actor != nullptr) {
@@ -99,16 +108,27 @@ void AWeapon::setBoxCollision(bool enabled) {
 		: ECollisionEnabled::Type::NoCollision;
 
 	if (enabled) {
+		ignoredActors.AddUnique(GetOwner());
 		trailParticleEmitter->ActivateSystem();
 		trailParticleEmitter->BeginTrails(TRAIL_START_SOCKET, TRAIL_END_SOCKET, ETrailWidthMode_FromCentre, 1.f);
 	} else {
 		ignoredActors.Empty();
-		ignoredActors.AddUnique(GetOwner());
 		trailParticleEmitter->EndTrails();
 		trailParticleEmitter->DeactivateSystem();
 	}
 	
 	box->SetCollisionEnabled(collisionType);
+}
+
+void AWeapon::setBoxExtent(const FVector& halfSize, const FVector& traceSize) {
+	boxTraceExtent = traceSize;
+	box->SetBoxExtent(halfSize);
+
+	FVector origin = boxTraceOrigin->GetRelativeLocation();
+	boxTraceOrigin->SetRelativeLocation(FVector(origin.X, origin.Y, -traceSize.Z));
+
+	FVector destination = boxTraceDestination->GetRelativeLocation();
+	boxTraceDestination->SetRelativeLocation(FVector(destination.X, destination.Y, traceSize.Z));
 }
 
 void AWeapon::BeginPlay() {

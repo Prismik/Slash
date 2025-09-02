@@ -4,7 +4,7 @@
 #include "Characters/MainCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "Interactable.h"
+#include "Interactables/Interactable.h"
 #include "Animation/AnimMontage.h"
 #include "Camera/CameraComponent.h"
 #include "Characters/Components/AnimOrchestrator.h"
@@ -138,6 +138,7 @@ void AMainCharacter::disarm() {
 }
 
 void AMainCharacter::initializeOverlay() {
+	SpawnDefaultController();
 	APlayerController* playerCtrl = Cast<APlayerController>(GetController());
 	if (!playerCtrl) return;
 
@@ -170,6 +171,7 @@ void AMainCharacter::focus(AEnemy* target) {
 		focusedTarget = target;
 		GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
 		springArm->bUsePawnControlRotation = false;
+		springArm->bInheritPitch = springArm->bInheritRoll = false;
 		focusMode = EFocusMode::EFM_focusedOnEnemy;
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 	} else {
@@ -188,6 +190,7 @@ void AMainCharacter::focus(AEnemy* target) {
 		GetCharacterMovement()->MaxWalkSpeed = jogSpeed;
 		GetCharacterMovement()->bOrientRotationToMovement = true;
 		springArm->bUsePawnControlRotation = true;
+		springArm->bInheritPitch = springArm->bInheritRoll = true;
 	}
 }
 
@@ -228,16 +231,19 @@ void AMainCharacter::Tick(float DeltaTime) {
 	}
 
 	overlay->setEnergy(attributes->energyPercent());
-
+	
 	if (isFocused()) {
 		if (focusedTarget->isAlive()) {
-			focusVector = (focusedTarget->GetActorLocation() - GetActorLocation()).GetSafeNormal2D();
+			const FVector focusPoint = focusedTarget->GetActorLocation() + focusedTarget->focusOffset();
+			const FVector origin = GetActorLocation() + springArm->GetRelativeLocation();
+			focusVector = (focusPoint - origin).GetSafeNormal2D();
 			FRotator rotator = focusVector.ToOrientationRotator();
 			const FRotator interpRotator = FMath::InterpExpoIn(GetActorRotation(), rotator, 0.65f);
 			SetActorRotation(interpRotator);
 
-			rotator.Add(-35.f, 0, 0);
-			springArm->SetWorldRotation(rotator);
+			FRotator r = FRotator::ZeroRotator;
+			r.Add(-35.f, 0.f, 0);
+			springArm->SetRelativeRotation(r);
 		} else {
 			if (focusedTarget) {
 				focusableEnemies.Remove(focusedTarget);

@@ -40,6 +40,8 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Events")
 	void OnFocusEnd();
+
+	FVector focusOffset();
 	
 	virtual void hit_Implementation(const FVector& p, AActor* hitter) override;
 	virtual void Tick(float DeltaTime) override;
